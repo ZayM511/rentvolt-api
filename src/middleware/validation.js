@@ -36,10 +36,10 @@ const schemas = {
 
   stripeCheckout: Joi.object({
     plan: Joi.string()
-      .valid('basic', 'pro')
+      .valid('growth', 'scale', 'enterprise')
       .required()
       .messages({
-        'any.required': 'Plan is required (basic or pro)'
+        'any.required': 'Plan is required (growth, scale, or enterprise)'
       })
   })
 };

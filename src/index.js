@@ -82,6 +82,7 @@ app.get('/', (req, res) => {
       locations: 'GET /api/scrape/locations',
       listings: 'POST /api/scrape/listings',
       bulk: 'POST /api/scrape/bulk',
+      plans: 'GET /api/stripe/plans',
       checkout: 'POST /api/stripe/checkout'
     }
   });

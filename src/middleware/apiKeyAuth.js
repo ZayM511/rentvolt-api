@@ -4,9 +4,9 @@ const crypto = require('crypto');
 
 // Default test keys (override with KEYS_FILE env var for production)
 const DEFAULT_KEYS = {
-  'sk_test_free_001': { plan: 'free', monthlyRequests: 100, used: 0, resetAt: null },
-  'sk_test_basic_002': { plan: 'basic', monthlyRequests: 1000, used: 0, resetAt: null },
-  'sk_test_pro_003': { plan: 'pro', monthlyRequests: 10000, used: 0, resetAt: null }
+  'sk_test_free_001': { plan: 'free', monthlyRequests: 50, used: 0, resetAt: null },
+  'sk_test_basic_002': { plan: 'growth', monthlyRequests: 1000, used: 0, resetAt: null },
+  'sk_test_pro_003': { plan: 'scale', monthlyRequests: 5000, used: 0, resetAt: null }
 };
 
 // In-memory store with periodic file persistence

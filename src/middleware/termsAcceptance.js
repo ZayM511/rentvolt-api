@@ -13,7 +13,7 @@ const termsAcceptance = (req, res, next) => {
     return res.status(403).json({
       error: 'Terms of Service must be accepted',
       message: 'Include header: x-terms-accepted: true',
-      termsUrl: 'https://github.com/ZayM511/realestate-scraper-api/blob/main/legal/TermsOfService.md'
+      termsUrl: 'https://github.com/ZayM511/rentvolt-api/blob/main/legal/TermsOfService.md'
     });
   }
   next();
