@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: realestate-scraper-api
+    name: rentvolt-api
     env: node
     region: oregon
     buildCommand: npm install

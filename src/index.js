@@ -52,8 +52,8 @@ app.use((req, res, next) => {
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'Real Estate Scraper API',
-    version: '1.0.0',
+    service: 'RentVolt API',
+    version: '1.1.0',
     uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString()
   });
@@ -72,9 +72,9 @@ app.get('/legal', (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    service: 'Real Estate Scraper API',
+    service: 'RentVolt API',
     company: COMPANY.name,
-    version: '1.0.0',
+    version: '1.1.0',
     endpoints: {
       health: 'GET /health',
       legal: 'GET /legal',
@@ -128,7 +128,7 @@ app.use((err, req, res, _next) => {
 const server = app.listen(PORT, () => {
   console.log(`
 ╔═══════════════════════════════════════════════╗
-║   Real Estate Scraper API  v1.0.0              ║
+║   RentVolt API  v1.1.0              ║
 ║   © 2026 Groundwork Labs LLC                  ║
 ║   California, USA                             ║
 ║   Port ${PORT} │ ${process.env.NODE_ENV || 'development'}                     ║
