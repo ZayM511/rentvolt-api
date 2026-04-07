@@ -1,18 +1,35 @@
 const { scrapeRentals } = require('./rentals');
 const { scrapeZillow } = require('./zillow');
+const { scrapeApartments } = require('./apartments');
+const { scrapeRentCafe } = require('./rentcafe');
+const { scrapeHotpads } = require('./hotpads');
+const { scrapeZumper } = require('./zumper');
+
+const scrapers = {
+  rentals: scrapeRentals,
+  zillow: scrapeZillow,
+  apartments: scrapeApartments,
+  rentcafe: scrapeRentCafe,
+  hotpads: scrapeHotpads,
+  zumper: scrapeZumper
+};
 
 const scrapeAll = async (city, state, options = {}) => {
-  const { sources = ['rentals', 'zillow'], maxPrice, minBeds } = options;
+  const { sources = ['rentals', 'zillow', 'apartments', 'rentcafe', 'hotpads', 'zumper'], maxPrice, minBeds } = options;
   const results = [];
+  const sourceCounts = {};
   
-  if (sources.includes('rentals')) {
-    const rentals = await scrapeRentals(city, state);
-    results.push(...rentals);
-  }
-  
-  if (sources.includes('zillow')) {
-    const zillow = await scrapeZillow(city, state);
-    results.push(...zillow);
+  for (const source of sources) {
+    if (scrapers[source]) {
+      try {
+        const data = await scrapers[source](city, state);
+        results.push(...data);
+        sourceCounts[source] = data.length;
+      } catch (error) {
+        console.error(`Error scraping ${source}:`, error.message);
+        sourceCounts[source] = 0;
+      }
+    }
   }
   
   // Apply filters
@@ -23,18 +40,18 @@ const scrapeAll = async (city, state, options = {}) => {
   }
   
   if (minBeds) {
-    filtered = filtered.filter(l => parseInt(l.beds) >= minBeds);
+    filtered = filtered.filter(l => {
+      const beds = parseInt(l.beds?.replace(/[^0-9]/g, '')) || 0;
+      return beds >= minBeds;
+    });
   }
   
   return {
     listings: filtered,
     total: filtered.length,
-    sources: results.reduce((acc, r) => {
-      acc[r.source] = (acc[r.source] || 0) + 1;
-      return acc;
-    }, {}),
+    sources: sourceCounts,
     scrapedAt: new Date().toISOString()
   };
 };
 
-module.exports = { scrapeAll };
+module.exports = { scrapeAll, scrapers };
