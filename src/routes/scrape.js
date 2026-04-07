@@ -2,46 +2,93 @@ const express = require('express');
 const router = express.Router();
 const { scrapeAll } = require('../scrapers');
 
+// Single city lookup
 router.post('/listings', async (req, res) => {
   try {
-    // Validated data from middleware
     const { city, state, filters = {} } = req.validated || req.body;
-    
-    // Rate limit check for free tier
-    if (req.apiKey.plan === 'free' && req.apiKey.used >= req.apiKey.monthlyRequests) {
-      return res.status(429).json({ error: 'Monthly limit reached. Upgrade to continue.' });
-    }
-    
     const { sources, maxPrice, minBeds } = filters;
     const results = await scrapeAll(city, state, { sources, maxPrice, minBeds });
-    
+
     res.json({
+      success: true,
       ...results,
-      requestId: req.requestId
+      meta: {
+        requestId: req.requestId,
+        plan: req.apiKey.plan,
+        remaining: req.apiKey.remaining
+      }
     });
   } catch (error) {
     console.error('Scrape error:', error);
-    res.status(500).json({ error: error.message, requestId: req.requestId });
+    res.status(500).json({
+      success: false,
+      error: 'Scrape failed',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Internal error',
+      requestId: req.requestId
+    });
   }
 });
 
+// Bulk: scrape multiple cities in one request (Pro plan only)
+router.post('/bulk', async (req, res) => {
+  try {
+    const { locations, filters = {} } = req.body;
+
+    if (!Array.isArray(locations) || locations.length === 0) {
+      return res.status(400).json({ error: 'locations must be a non-empty array of { city, state }' });
+    }
+
+    if (locations.length > 10) {
+      return res.status(400).json({ error: 'Maximum 10 locations per bulk request' });
+    }
+
+    if (req.apiKey.plan === 'free') {
+      return res.status(403).json({ error: 'Bulk endpoint requires Basic or Pro plan', upgrade: 'POST /api/stripe/checkout' });
+    }
+
+    const results = await Promise.allSettled(
+      locations.map(({ city, state }) => scrapeAll(city, state, filters))
+    );
+
+    const response = locations.map((loc, i) => ({
+      city: loc.city,
+      state: loc.state,
+      ...(results[i].status === 'fulfilled'
+        ? { success: true, ...results[i].value }
+        : { success: false, error: results[i].reason?.message || 'Unknown error' })
+    }));
+
+    res.json({
+      success: true,
+      results: response,
+      totalLocations: locations.length,
+      meta: { requestId: req.requestId, plan: req.apiKey.plan, remaining: req.apiKey.remaining }
+    });
+  } catch (error) {
+    console.error('Bulk scrape error:', error);
+    res.status(500).json({ success: false, error: error.message, requestId: req.requestId });
+  }
+});
+
+// Supported locations & sources
 router.get('/locations', (req, res) => {
   res.json({
     locations: [
-      { city: 'oakland', state: 'ca' },
-      { city: 'san-francisco', state: 'ca' },
-      { city: 'los-angeles', state: 'ca' },
-      { city: 'san-jose', state: 'ca' },
-      { city: 'seattle', state: 'wa' },
-      { city: 'portland', state: 'or' },
-      { city: 'austin', state: 'tx' },
-      { city: 'denver', state: 'co' },
-      { city: 'chicago', state: 'il' },
-      { city: 'new-york', state: 'ny' },
-      { city: 'boston', state: 'ma' },
-      { city: 'miami', state: 'fl' }
+      { city: 'oakland', state: 'ca', region: 'Bay Area' },
+      { city: 'san-francisco', state: 'ca', region: 'Bay Area' },
+      { city: 'los-angeles', state: 'ca', region: 'Southern California' },
+      { city: 'san-jose', state: 'ca', region: 'Bay Area' },
+      { city: 'seattle', state: 'wa', region: 'Pacific Northwest' },
+      { city: 'portland', state: 'or', region: 'Pacific Northwest' },
+      { city: 'austin', state: 'tx', region: 'Texas' },
+      { city: 'denver', state: 'co', region: 'Mountain West' },
+      { city: 'chicago', state: 'il', region: 'Midwest' },
+      { city: 'new-york', state: 'ny', region: 'Northeast' },
+      { city: 'boston', state: 'ma', region: 'Northeast' },
+      { city: 'miami', state: 'fl', region: 'Southeast' }
     ],
-    sources: ['rentals.com', 'zillow.com', 'apartments.com', 'rentcafe.com', 'hotpads.com', 'zumper.com']
+    sources: ['rentals', 'zillow', 'apartments', 'rentcafe', 'hotpads', 'zumper'],
+    note: 'Any US city can be queried; listed locations have optimized coverage.'
   });
 });
 

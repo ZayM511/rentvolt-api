@@ -12,111 +12,141 @@ const scrapeRoutes = require('./routes/scrape');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const COMPANY = {
+  name: 'Groundwork Labs LLC',
+  type: 'Limited Liability Company',
+  jurisdiction: 'California, USA'
+};
 
-// Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-    }
-  }
+// ── Security ─────────────────────────────────────
+app.use(helmet());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'x-api-key', 'x-terms-accepted']
 }));
-app.use(cors({ origin: '*' }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
-// Request logging
+// ── Logging ──────────────────────────────────────
 app.use(requestLogger);
 
-// Rate limiting
+// ── Rate Limiting ────────────────────────────────
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: parseInt(process.env.RATE_LIMIT_MAX || '200', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests', retryAfter: '15 minutes' }
 });
 app.use(limiter);
 
-// Legal headers
+// ── Company Headers ──────────────────────────────
 app.use((req, res, next) => {
-  res.setHeader('X-Company', 'Groundwork Labs LLC');
-  res.setHeader('X-Jurisdiction', 'California, USA');
+  res.setHeader('X-Company', COMPANY.name);
+  res.setHeader('X-Jurisdiction', COMPANY.jurisdiction);
   res.setHeader('X-Terms-Version', '2026.04.07');
   next();
 });
 
-// API Key required for all /api routes
-app.use('/api', apiKeyAuth);
-
-// Terms acceptance required for paid plans
-app.use('/api/stripe', termsAcceptance);
-app.use('/api/scrape', termsAcceptance);
-
-// API Routes with validation
-app.use('/api/stripe', validate(schemas.stripeCheckout, 'body'), stripeRoutes);
-app.use('/api/scrape', validate(schemas.scrapeListings, 'body'), scrapeRoutes);
-
-// Health check
+// ── Public Routes ────────────────────────────────
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    company: 'Groundwork Labs LLC',
-    jurisdiction: 'California, USA',
-    timestamp: new Date().toISOString() 
+  res.json({
+    status: 'ok',
+    service: 'Real Estate Scraper API',
+    version: '1.0.0',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
   });
 });
 
-// Legal info endpoint
 app.get('/legal', (req, res) => {
   res.json({
-    company: 'Groundwork Labs LLC',
-    type: 'Limited Liability Company',
-    jurisdiction: 'California, USA',
+    company: COMPANY.name,
+    type: COMPANY.type,
+    jurisdiction: COMPANY.jurisdiction,
     termsOfService: 'https://github.com/ZayM511/realestate-scraper-api/blob/main/legal/TermsOfService.md',
     privacyPolicy: 'https://github.com/ZayM511/realestate-scraper-api/blob/main/legal/PrivacyPolicy.md',
     disclaimer: 'https://github.com/ZayM511/realestate-scraper-api/blob/main/legal/LegalDisclaimer.md'
   });
 });
 
-// API Key check
-app.get('/api/verify', termsAcceptance, (req, res) => {
-  res.json({ valid: true, plan: req.apiKey.plan });
-});
-
-// Root
 app.get('/', (req, res) => {
   res.json({
     service: 'Real Estate Scraper API',
-    company: 'Groundwork Labs LLC',
+    company: COMPANY.name,
     version: '1.0.0',
-    docs: '/api-docs',
-    legal: '/legal',
-    health: '/health'
+    endpoints: {
+      health: 'GET /health',
+      legal: 'GET /legal',
+      verify: 'GET /api/verify',
+      locations: 'GET /api/scrape/locations',
+      listings: 'POST /api/scrape/listings',
+      bulk: 'POST /api/scrape/bulk',
+      checkout: 'POST /api/stripe/checkout'
+    }
   });
 });
 
-// 404 handler
+// ── Authenticated Routes ─────────────────────────
+app.use('/api', apiKeyAuth);
+
+app.get('/api/verify', (req, res) => {
+  res.json({
+    valid: true,
+    plan: req.apiKey.plan,
+    remaining: req.apiKey.remaining
+  });
+});
+
+// Stripe (needs terms acceptance + validation)
+app.use('/api/stripe', termsAcceptance, stripeRoutes);
+
+// Scrape (terms acceptance; validation applied per-route inside scrape router)
+app.use('/api/scrape', termsAcceptance, scrapeRoutes);
+
+// ── 404 ──────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ error: 'Not found', path: req.path });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(`[ERROR] ${err.message}`);
-  res.status(500).json({ 
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  res.status(404).json({
+    error: 'Not found',
+    path: req.path,
+    hint: 'GET / for available endpoints'
   });
 });
 
-app.listen(PORT, () => {
+// ── Global Error Handler ─────────────────────────
+app.use((err, req, res, _next) => {
+  console.error(`[ERROR] ${err.stack || err.message}`);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    error: status >= 500 ? 'Internal server error' : err.message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    requestId: req.requestId
+  });
+});
+
+// ── Start ────────────────────────────────────────
+const server = app.listen(PORT, () => {
   console.log(`
 ╔═══════════════════════════════════════════════╗
-║   Real Estate Scraper API                     ║
+║   Real Estate Scraper API  v1.0.0              ║
 ║   © 2026 Groundwork Labs LLC                  ║
 ║   California, USA                             ║
-║   Running on port ${PORT}                        ║
+║   Port ${PORT} │ ${process.env.NODE_ENV || 'development'}                     ║
 ╚═══════════════════════════════════════════════╝
   `);
 });
+
+// Graceful shutdown
+const shutdown = (signal) => {
+  console.log(`\n[${signal}] Shutting down gracefully...`);
+  server.close(() => {
+    console.log('Server closed.');
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(1), 10000);
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 module.exports = app;

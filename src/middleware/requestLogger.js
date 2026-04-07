@@ -1,20 +1,23 @@
+const crypto = require('crypto');
+
 const requestLogger = (req, res, next) => {
   const start = Date.now();
-  const requestId = Math.random().toString(36).substring(7);
-  
-  // Add request ID
+  const requestId = crypto.randomUUID().slice(0, 12);
+
   req.requestId = requestId;
-  
-  // Log request
-  console.log(`[${requestId}] ${req.method} ${req.path} - Started`);
-  
-  // Log response on finish
+  res.setHeader('X-Request-Id', requestId);
+
+  // Log request (skip health checks in production)
+  if (req.path !== '/health' || process.env.NODE_ENV !== 'production') {
+    console.log(`[${requestId}] ${req.method} ${req.path} ${req.ip}`);
+  }
+
   res.on('finish', () => {
     const duration = Date.now() - start;
-    const statusColor = res.statusCode >= 400 ? '🔴' : res.statusCode >= 200 ? '🟢' : '🟡';
-    console.log(`[${requestId}] ${req.method} ${req.path} - ${res.statusCode} (${duration}ms) ${statusColor}`);
+    const icon = res.statusCode >= 500 ? '🔴' : res.statusCode >= 400 ? '🟡' : '🟢';
+    console.log(`[${requestId}] ${icon} ${res.statusCode} (${duration}ms)`);
   });
-  
+
   next();
 };
 

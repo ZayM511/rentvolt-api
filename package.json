@@ -1,12 +1,19 @@
 {
   "name": "realestate-scraper-api",
-  "version": "1.0.0",
-  "description": "API for scraping real estate rental listings - Groundwork Labs LLC (California)",
+  "version": "1.1.0",
+  "description": "Real estate rental listing API - Groundwork Labs LLC (California)",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node src/index.js",
+    "dev": "NODE_ENV=development node src/index.js",
     "test": "node test.js"
+  },
+  "keywords": ["real-estate", "scraper", "api", "rentals", "listings"],
+  "author": "Groundwork Labs LLC",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "axios": "^1.6.2",

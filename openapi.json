@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Real Estate Scraper API",
-    "description": "API for scraping real estate rental listings - provided by Groundwork Labs LLC (California)",
-    "version": "1.0.0",
+    "description": "Aggregated rental listing data from multiple sources. Provided by Groundwork Labs LLC (California).",
+    "version": "1.1.0",
     "contact": {
       "name": "Groundwork Labs LLC",
       "email": "support@groundworklabs.com"
@@ -12,7 +12,7 @@
   "servers": [
     {
       "url": "https://realestate-scraper-api.onrender.com",
-      "description": "Production server"
+      "description": "Production"
     },
     {
       "url": "http://localhost:3000",
@@ -22,196 +22,152 @@
   "paths": {
     "/": {
       "get": {
-        "summary": "API Information",
+        "summary": "API information and available endpoints",
+        "tags": ["Public"],
         "responses": {
-          "200": {
-            "description": "API information",
-            "content": {
-              "application/json": {
-                "example": {
-                  "service": "Real Estate Scraper API",
-                  "company": "Groundwork Labs LLC",
-                  "version": "1.0.0"
-                }
-              }
-            }
-          }
+          "200": { "description": "API info with endpoint listing" }
         }
       }
     },
     "/health": {
       "get": {
         "summary": "Health check",
+        "tags": ["Public"],
         "responses": {
-          "200": {
-            "description": "Service is healthy"
-          }
+          "200": { "description": "Service status, uptime, and timestamp" }
         }
       }
     },
     "/legal": {
       "get": {
         "summary": "Legal and company information",
+        "tags": ["Public"],
         "responses": {
-          "200": {
-            "description": "Legal information",
-            "content": {
-              "application/json": {
-                "example": {
-                  "company": "Groundwork Labs LLC",
-                  "type": "Limited Liability Company",
-                  "jurisdiction": "California, USA"
-                }
-              }
-            }
-          }
+          "200": { "description": "Company info and legal document links" }
         }
       }
     },
     "/api/verify": {
       "get": {
-        "summary": "Verify API key",
+        "summary": "Verify API key and check remaining quota",
+        "tags": ["Auth"],
         "security": [{ "ApiKeyAuth": [] }],
         "responses": {
           "200": {
-            "description": "Valid API key",
+            "description": "Key is valid",
+            "content": {
+              "application/json": {
+                "example": { "valid": true, "plan": "basic", "remaining": 950 }
+              }
+            }
+          },
+          "401": { "description": "Missing API key" },
+          "403": { "description": "Invalid API key" }
+        }
+      }
+    },
+    "/api/scrape/listings": {
+      "post": {
+        "summary": "Get rental listings for a city",
+        "tags": ["Scrape"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ScrapeRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Listings retrieved",
             "content": {
               "application/json": {
                 "example": {
-                  "valid": true,
-                  "plan": "basic"
+                  "success": true,
+                  "listings": [
+                    { "source": "apartments.com", "price": 2500, "address": "123 Main St, CA", "beds": "2 bed", "baths": "1 bath" }
+                  ],
+                  "total": 40,
+                  "sources": { "apartments": 10, "zillow": 10 },
+                  "query": { "city": "oakland", "state": "ca" }
                 }
               }
             }
           },
-          "401": {
-            "description": "Missing API key"
-          },
-          "403": {
-            "description": "Invalid API key"
+          "400": { "description": "Validation error" },
+          "429": { "description": "Rate limit or quota exceeded" }
+        }
+      }
+    },
+    "/api/scrape/bulk": {
+      "post": {
+        "summary": "Bulk scrape multiple cities (Basic/Pro only)",
+        "tags": ["Scrape"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["locations"],
+                "properties": {
+                  "locations": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "city": { "type": "string" },
+                        "state": { "type": "string" }
+                      },
+                      "required": ["city", "state"]
+                    }
+                  },
+                  "filters": { "$ref": "#/components/schemas/Filters" }
+                }
+              }
+            }
           }
+        },
+        "responses": {
+          "200": { "description": "Bulk results" },
+          "403": { "description": "Free plan cannot use bulk" }
+        }
+      }
+    },
+    "/api/scrape/locations": {
+      "get": {
+        "summary": "Get supported locations and sources",
+        "tags": ["Scrape"],
+        "responses": {
+          "200": { "description": "List of optimized locations and available sources" }
         }
       }
     },
     "/api/stripe/checkout": {
       "post": {
-        "summary": "Create Stripe checkout session",
+        "summary": "Create Stripe checkout session for plan upgrade",
+        "tags": ["Billing"],
         "security": [{ "ApiKeyAuth": [] }],
         "requestBody": {
-          "required": true",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "required": ["plan"],
                 "properties": {
-                  "plan": {
-                    "type": "string",
-                    "enum": ["basic", "pro"]
-                  }
+                  "plan": { "type": "string", "enum": ["basic", "pro"] }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Checkout session created",
-            "content": {
-              "application/json": {
-                "example": {
-                  "sessionId": "cs_test_...",
-                  "url": "https://checkout.stripe.com/..."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/scrape/listings": {
-      "post": {
-        "summary": "Get rental listings for a location",
-        "security": [{ "ApiKeyAuth": [] }],
-        "requestBody": {
-          "required": true",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["city", "state"],
-                "properties": {
-                  "city": {
-                    "type": "string",
-                    "example": "oakland"
-                  },
-                  "state": {
-                    "type": "string",
-                    "example": "ca"
-                  },
-                  "filters": {
-                    "type": "object",
-                    "properties": {
-                      "maxPrice": { "type": "number" },
-                      "minBeds": { "type": "number" },
-                      "sources": {
-                        "type": "array",
-                        "items": { "type": "string" }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Listings retrieved successfully",
-            "content": {
-              "application/json": {
-                "example": {
-                  "listings": [
-                    {
-                      "source": "rentals.com",
-                      "price": 2500,
-                      "address": "123 Main St, CA",
-                      "beds": "2 bed",
-                      "baths": "1 bath"
-                    }
-                  ],
-                  "total": 40,
-                  "sources": { "rentals.com": 10, "zillow.com": 10 }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limit exceeded"
-          }
-        }
-      }
-    },
-    "/api/scrape/locations": {
-      "get": {
-        "summary": "Get supported locations",
-        "responses": {
-          "200": {
-            "description": "List of supported locations",
-            "content": {
-              "application/json": {
-                "example": {
-                  "locations": [
-                    { "city": "oakland", "state": "ca" }
-                  ],
-                  "sources": ["rentals.com", "zillow.com", "apartments.com"]
-                }
-              }
-            }
-          }
+          "200": { "description": "Checkout session with redirect URL" }
         }
       }
     }
@@ -222,6 +178,29 @@
         "type": "apiKey",
         "in": "header",
         "name": "x-api-key"
+      }
+    },
+    "schemas": {
+      "ScrapeRequest": {
+        "type": "object",
+        "required": ["city", "state"],
+        "properties": {
+          "city": { "type": "string", "example": "oakland" },
+          "state": { "type": "string", "example": "ca", "minLength": 2, "maxLength": 2 },
+          "filters": { "$ref": "#/components/schemas/Filters" }
+        }
+      },
+      "Filters": {
+        "type": "object",
+        "properties": {
+          "sources": { "type": "array", "items": { "type": "string", "enum": ["rentals", "zillow", "apartments", "rentcafe", "hotpads", "zumper"] } },
+          "maxPrice": { "type": "integer", "minimum": 0 },
+          "minBeds": { "type": "integer", "minimum": 0 },
+          "maxBeds": { "type": "integer", "minimum": 0 },
+          "sortBy": { "type": "string", "enum": ["price", "source"], "default": "price" },
+          "sortOrder": { "type": "string", "enum": ["asc", "desc"], "default": "asc" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 500 }
+        }
       }
     }
   }
