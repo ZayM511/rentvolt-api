@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RentVolt — Real Estate Rental Data API</title>
+  <meta name="description" content="Aggregate rental listings from 6 sources in one API call. Built for investors, researchers, and developers.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a2e; background: #fafbfc; }
+    .hero { background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 50%, #0d47a1 100%); color: white; padding: 80px 20px; text-align: center; }
+    .hero h1 { font-size: 3.2em; margin-bottom: 16px; }
+    .hero h1 span { color: #4fc3f7; }
+    .hero p { font-size: 1.3em; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
+    .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn { padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1em; transition: transform 0.2s; display: inline-block; }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: #4fc3f7; color: #0a1628; }
+    .btn-secondary { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.4); }
+    .section { max-width: 1000px; margin: 0 auto; padding: 60px 20px; }
+    .section h2 { font-size: 2em; margin-bottom: 32px; text-align: center; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .feature { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .feature h3 { font-size: 1.2em; margin-bottom: 8px; }
+    .feature p { color: #666; line-height: 1.6; }
+    .feature .icon { font-size: 2em; margin-bottom: 12px; }
+    .pricing { background: #f0f4f8; padding: 60px 20px; }
+    .pricing h2 { font-size: 2em; margin-bottom: 40px; text-align: center; }
+    .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+    .plan { background: white; padding: 32px; border-radius: 12px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.06); position: relative; }
+    .plan.popular { border: 3px solid #0d47a1; }
+    .plan.popular::after { content: 'MOST POPULAR'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #0d47a1; color: white; padding: 4px 16px; border-radius: 20px; font-size: 0.75em; font-weight: 700; }
+    .plan h3 { font-size: 1.3em; margin-bottom: 8px; }
+    .plan .price { font-size: 2.5em; font-weight: 800; margin: 16px 0; }
+    .plan .price span { font-size: 0.4em; font-weight: 400; color: #888; }
+    .plan ul { list-style: none; margin: 20px 0; text-align: left; }
+    .plan ul li { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+    .plan ul li::before { content: '✓ '; color: #4caf50; font-weight: bold; }
+    .code-block { background: #1a1a2e; color: #4fc3f7; padding: 24px; border-radius: 12px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.9em; line-height: 1.8; }
+    .sources { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 20px; }
+    .source-tag { background: rgba(79,195,247,0.15); color: #0d47a1; padding: 8px 20px; border-radius: 20px; font-weight: 500; }
+    footer { background: #0a1628; color: rgba(255,255,255,0.7); text-align: center; padding: 40px 20px; }
+    footer a { color: #4fc3f7; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>⚡ <span>RentVolt</span></h1>
+    <p>Aggregate rental listings from 6 major sources in a single API call. Real data, lightning fast.</p>
+    <div class="hero-buttons">
+      <a href="/api-docs" class="btn btn-primary">Interactive Docs</a>
+      <a href="https://github.com/ZayM511/rentvolt-api" class="btn btn-secondary">GitHub</a>
+    </div>
+    <div class="sources" style="margin-top: 40px;">
+      <span class="source-tag">Apartments.com</span>
+      <span class="source-tag">Zillow</span>
+      <span class="source-tag">Rent.com</span>
+      <span class="source-tag">RentCafe</span>
+      <span class="source-tag">HotPads</span>
+      <span class="source-tag">Zumper</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Why RentVolt?</h2>
+    <div class="features">
+      <div class="feature">
+        <div class="icon">⚡</div>
+        <h3>6 Sources, 1 Call</h3>
+        <p>Stop scraping sites individually. RentVolt aggregates Apartments.com, Zillow, Rent.com, RentCafe, HotPads, and Zumper in parallel.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🔍</div>
+        <h3>Smart Filtering</h3>
+        <p>Filter by price, bedrooms, source. Results are deduplicated by address and sorted by price automatically.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📦</div>
+        <h3>Bulk Queries</h3>
+        <p>Query up to 10 cities in a single request. Perfect for market analysis across metro areas.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🔑</div>
+        <h3>Simple Auth</h3>
+        <p>One API key, one header. Usage tracking with monthly auto-reset. Start free, scale when ready.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📋</div>
+        <h3>OpenAPI Spec</h3>
+        <p>Full OpenAPI 3.0 documentation with interactive Swagger UI. Try endpoints directly in your browser.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🚀</div>
+        <h3>Deploy Anywhere</h3>
+        <p>Dockerfile and render.yaml included. Deploy to Render, Railway, Fly.io, or your own infrastructure.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Quick Example</h2>
+    <div class="code-block">
+<pre>curl -X POST https://your-domain.com/api/scrape/listings \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "city": "oakland",
+    "state": "ca",
+    "filters": {
+      "maxPrice": 3000,
+      "minBeds": 2,
+      "sortBy": "price",
+      "limit": 20
+    }
+  }'</pre>
+    </div>
+  </div>
+
+  <div class="pricing">
+    <h2>Simple Pricing</h2>
+    <div class="plans">
+      <div class="plan">
+        <h3>Starter</h3>
+        <div class="price">Free</div>
+        <ul>
+          <li>50 requests/month</li>
+          <li>All 6 sources</li>
+          <li>Single city queries</li>
+          <li>Community support</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h3>Growth</h3>
+        <div class="price">$19<span>/mo</span></div>
+        <ul>
+          <li>1,000 requests/month</li>
+          <li>All 6 sources</li>
+          <li>Bulk queries (10 cities)</li>
+          <li>Email support</li>
+        </ul>
+      </div>
+      <div class="plan popular">
+        <h3>Scale</h3>
+        <div class="price">$49<span>/mo</span></div>
+        <ul>
+          <li>5,000 requests/month</li>
+          <li>All 6 sources</li>
+          <li>Bulk queries (10 cities)</li>
+          <li>Priority support</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h3>Enterprise</h3>
+        <div class="price">$149<span>/mo</span></div>
+        <ul>
+          <li>25,000 requests/month</li>
+          <li>All 6 sources</li>
+          <li>Bulk queries (10 cities)</li>
+          <li>Dedicated support</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>RentVolt</strong> — A <a href="/legal">Groundwork Labs LLC</a> Product</p>
+    <p style="margin-top: 8px;">© 2026 All Rights Reserved | <a href="/legal">Legal</a> | <a href="/api-docs">API Docs</a> | <a href="/health">Status</a></p>
+  </footer>
+</body>
+</html>

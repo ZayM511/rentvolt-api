@@ -8,6 +8,9 @@ const termsAcceptance = require('./middleware/termsAcceptance');
 const requestLogger = require('./middleware/requestLogger');
 const { validate, schemas } = require('./middleware/validation');
 const stripeRoutes = require('./routes/stripe');
+const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const openApiSpec = require('../openapi.json');
 const scrapeRoutes = require('./routes/scrape');
 
 const app = express();
@@ -48,6 +51,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── Docs ─────────────────────────────────────────
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'RentVolt API Docs'
+}));
+
 // ── Public Routes ────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({
@@ -71,10 +80,16 @@ app.get('/legal', (req, res) => {
 });
 
 app.get('/', (req, res) => {
+  const accept = req.headers.accept || '';
+  if (accept.includes('text/html')) {
+    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
   res.json({
     service: 'RentVolt API',
     company: COMPANY.name,
     version: '1.1.0',
+    website: '/',
+    docs: '/api-docs',
     endpoints: {
       health: 'GET /health',
       legal: 'GET /legal',
