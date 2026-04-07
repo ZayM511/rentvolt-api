@@ -1,0 +1,18 @@
+{
+  "name": "realestate-scraper-api",
+  "version": "1.0.0",
+  "description": "API for scraping real estate rental listings - pricing data for investors",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "stripe": "^14.10.0",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5"
+  }
+}
