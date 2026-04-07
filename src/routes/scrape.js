@@ -1,44 +1,46 @@
 const express = require('express');
 const router = express.Router();
-
-// Simulated scraper - replace with actual scraping logic
-const scrapeListings = async (location, filters = {}) => {
-  // Placeholder - actual scraping logic to be added
-  // Would integrate with rentals.com, Zillow, etc.
-  return {
-    listings: [],
-    total: 0,
-    scrapedAt: new Date().toISOString()
-  };
-};
+const { scrapeAll } = require('../scrapers');
 
 router.post('/listings', async (req, res) => {
   try {
-    const { location, filters } = req.body;
+    const { city, state, filters = {} } = req.body;
     
-    if (!location) {
-      return res.status(400).json({ error: 'Location is required' });
+    if (!city || !state) {
+      return res.status(400).json({ error: 'City and state are required' });
     }
     
-    const results = await scrapeListings(location, filters);
+    // Rate limit check for free tier
+    if (req.apiKey.plan === 'free' && req.apiKey.used >= req.apiKey.monthlyRequests) {
+      return res.status(429).json({ error: 'Monthly limit reached. Upgrade to continue.' });
+    }
+    
+    const results = await scrapeAll(city, state, filters);
+    
+    // Mark API key usage
+    if (req.apiKey.plan !== 'free') {
+      // Track usage in production DB
+    }
+    
     res.json(results);
   } catch (error) {
+    console.error('Scrape error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 router.get('/locations', (req, res) => {
-  // Supported locations
   res.json({
     locations: [
-      'oakland-ca',
-      'san-francisco-ca',
-      'los-angeles-ca',
-      'seattle-wa',
-      'portland-or',
-      'austin-tx',
-      'denver-co'
-    ]
+      { city: 'oakland', state: 'ca' },
+      { city: 'san-francisco', state: 'ca' },
+      { city: 'los-angeles', state: 'ca' },
+      { city: 'seattle', state: 'wa' },
+      { city: 'portland', state: 'or' },
+      { city: 'austin', state: 'tx' },
+      { city: 'denver', state: 'co' }
+    ],
+    sources: ['rentals.com', 'zillow.com']
   });
 });
 
