@@ -4,11 +4,8 @@ const { scrapeAll } = require('../scrapers');
 
 router.post('/listings', async (req, res) => {
   try {
-    const { city, state, filters = {} } = req.body;
-    
-    if (!city || !state) {
-      return res.status(400).json({ error: 'City and state are required' });
-    }
+    // Validated data from middleware
+    const { city, state, filters = {} } = req.validated || req.body;
     
     // Rate limit check for free tier
     if (req.apiKey.plan === 'free' && req.apiKey.used >= req.apiKey.monthlyRequests) {
@@ -18,10 +15,13 @@ router.post('/listings', async (req, res) => {
     const { sources, maxPrice, minBeds } = filters;
     const results = await scrapeAll(city, state, { sources, maxPrice, minBeds });
     
-    res.json(results);
+    res.json({
+      ...results,
+      requestId: req.requestId
+    });
   } catch (error) {
     console.error('Scrape error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message, requestId: req.requestId });
   }
 });
 

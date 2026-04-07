@@ -5,6 +5,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const apiKeyAuth = require('./middleware/apiKeyAuth');
 const termsAcceptance = require('./middleware/termsAcceptance');
+const requestLogger = require('./middleware/requestLogger');
+const { validate, schemas } = require('./middleware/validation');
 const stripeRoutes = require('./routes/stripe');
 const scrapeRoutes = require('./routes/scrape');
 
@@ -24,10 +26,13 @@ app.use(helmet({
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
+// Request logging
+app.use(requestLogger);
+
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100
 });
 app.use(limiter);
 
@@ -46,9 +51,9 @@ app.use('/api', apiKeyAuth);
 app.use('/api/stripe', termsAcceptance);
 app.use('/api/scrape', termsAcceptance);
 
-// API Routes
-app.use('/api/stripe', stripeRoutes);
-app.use('/api/scrape', scrapeRoutes);
+// API Routes with validation
+app.use('/api/stripe', validate(schemas.stripeCheckout, 'body'), stripeRoutes);
+app.use('/api/scrape', validate(schemas.scrapeListings, 'body'), scrapeRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -83,14 +88,35 @@ app.get('/', (req, res) => {
     service: 'Real Estate Scraper API',
     company: 'Groundwork Labs LLC',
     version: '1.0.0',
+    docs: '/api-docs',
     legal: '/legal',
     health: '/health'
   });
 });
 
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found', path: req.path });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(`[ERROR] ${err.message}`);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  });
+});
+
 app.listen(PORT, () => {
-  console.log(`Real Estate Scraper API running on port ${PORT}`);
-  console.log(`Company: Groundwork Labs LLC (California)`);
+  console.log(`
+╔═══════════════════════════════════════════════╗
+║   Real Estate Scraper API                     ║
+║   © 2026 Groundwork Labs LLC                  ║
+║   California, USA                             ║
+║   Running on port ${PORT}                        ║
+╚═══════════════════════════════════════════════╝
+  `);
 });
 
 module.exports = app;

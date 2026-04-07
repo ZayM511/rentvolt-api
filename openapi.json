@@ -1,0 +1,228 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Real Estate Scraper API",
+    "description": "API for scraping real estate rental listings - provided by Groundwork Labs LLC (California)",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Groundwork Labs LLC",
+      "email": "support@groundworklabs.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://realestate-scraper-api.onrender.com",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "API Information",
+        "responses": {
+          "200": {
+            "description": "API information",
+            "content": {
+              "application/json": {
+                "example": {
+                  "service": "Real Estate Scraper API",
+                  "company": "Groundwork Labs LLC",
+                  "version": "1.0.0"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy"
+          }
+        }
+      }
+    },
+    "/legal": {
+      "get": {
+        "summary": "Legal and company information",
+        "responses": {
+          "200": {
+            "description": "Legal information",
+            "content": {
+              "application/json": {
+                "example": {
+                  "company": "Groundwork Labs LLC",
+                  "type": "Limited Liability Company",
+                  "jurisdiction": "California, USA"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/verify": {
+      "get": {
+        "summary": "Verify API key",
+        "security": [{ "ApiKeyAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Valid API key",
+            "content": {
+              "application/json": {
+                "example": {
+                  "valid": true,
+                  "plan": "basic"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing API key"
+          },
+          "403": {
+            "description": "Invalid API key"
+          }
+        }
+      }
+    },
+    "/api/stripe/checkout": {
+      "post": {
+        "summary": "Create Stripe checkout session",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["plan"],
+                "properties": {
+                  "plan": {
+                    "type": "string",
+                    "enum": ["basic", "pro"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout session created",
+            "content": {
+              "application/json": {
+                "example": {
+                  "sessionId": "cs_test_...",
+                  "url": "https://checkout.stripe.com/..."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scrape/listings": {
+      "post": {
+        "summary": "Get rental listings for a location",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["city", "state"],
+                "properties": {
+                  "city": {
+                    "type": "string",
+                    "example": "oakland"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "ca"
+                  },
+                  "filters": {
+                    "type": "object",
+                    "properties": {
+                      "maxPrice": { "type": "number" },
+                      "minBeds": { "type": "number" },
+                      "sources": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Listings retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "listings": [
+                    {
+                      "source": "rentals.com",
+                      "price": 2500,
+                      "address": "123 Main St, CA",
+                      "beds": "2 bed",
+                      "baths": "1 bath"
+                    }
+                  ],
+                  "total": 40,
+                  "sources": { "rentals.com": 10, "zillow.com": 10 }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/scrape/locations": {
+      "get": {
+        "summary": "Get supported locations",
+        "responses": {
+          "200": {
+            "description": "List of supported locations",
+            "content": {
+              "application/json": {
+                "example": {
+                  "locations": [
+                    { "city": "oakland", "state": "ca" }
+                  ],
+                  "sources": ["rentals.com", "zillow.com", "apartments.com"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  }
+}
