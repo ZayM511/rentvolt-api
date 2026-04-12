@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { scrapeAll } = require('../scrapers');
+const { validate, schemas } = require('../middleware/validation');
 
 // Single city lookup
-router.post('/listings', async (req, res) => {
+router.post('/listings', validate(schemas.scrapeListings), async (req, res) => {
   try {
     const { city, state, filters = {} } = req.validated || req.body;
     const { sources, maxPrice, minBeds } = filters;
@@ -43,7 +44,7 @@ router.post('/bulk', async (req, res) => {
     }
 
     if (req.apiKey.plan === 'free') {
-      return res.status(403).json({ error: 'Bulk endpoint requires Basic or Pro plan', upgrade: 'POST /api/stripe/checkout' });
+      return res.status(403).json({ error: 'Bulk endpoint requires a paid plan (Growth, Scale, or Enterprise)', upgrade: 'POST /api/stripe/checkout' });
     }
 
     const results = await Promise.allSettled(

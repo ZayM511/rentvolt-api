@@ -60,7 +60,10 @@ app.use(cors({
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'x-api-key', 'x-terms-accepted']
 }));
-app.use(express.json({ limit: '1mb' }));
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/stripe/webhook') return next();
+  express.json({ limit: '1mb' })(req, res, next);
+});
 
 // ── Logging ──────────────────────────────────────
 app.use(requestLogger);
@@ -105,9 +108,9 @@ app.get('/legal', (req, res) => {
     company: COMPANY.name,
     type: COMPANY.type,
     jurisdiction: COMPANY.jurisdiction,
-    termsOfService: 'https://github.com/ZayM511/realestate-scraper-api/blob/main/legal/TermsOfService.md',
-    privacyPolicy: 'https://github.com/ZayM511/realestate-scraper-api/blob/main/legal/PrivacyPolicy.md',
-    disclaimer: 'https://github.com/ZayM511/realestate-scraper-api/blob/main/legal/LegalDisclaimer.md'
+    termsOfService: 'https://github.com/ZayM511/rentvolt-api/blob/main/legal/TermsOfService.md',
+    privacyPolicy: 'https://github.com/ZayM511/rentvolt-api/blob/main/legal/PrivacyPolicy.md',
+    disclaimer: 'https://github.com/ZayM511/rentvolt-api/blob/main/legal/LegalDisclaimer.md'
   });
 });
 
@@ -194,7 +197,12 @@ app.get('/demo/listings', async (req, res) => {
 });
 
 // ── Authenticated Routes ─────────────────────────
-app.use('/api', apiKeyAuth);
+app.use('/api', (req, res, next) => {
+  // Public Stripe routes bypass API key auth
+  const publicPaths = ['/stripe/checkout', '/stripe/plans', '/stripe/webhook'];
+  if (publicPaths.includes(req.path)) return next();
+  return apiKeyAuth(req, res, next);
+});
 
 app.get('/api/verify', (req, res) => {
   res.json({
@@ -204,13 +212,13 @@ app.get('/api/verify', (req, res) => {
   });
 });
 
-// Stripe — checkout/plans are public (for landing page), management routes need terms
+// Stripe — checkout/plans/webhook are public, manage needs terms acceptance
 app.use('/api/stripe', (req, res, next) => {
   if (req.path === '/checkout' || req.path === '/plans' || req.path === '/webhook') return next();
   return termsAcceptance(req, res, next);
 }, stripeRoutes);
 
-// Scrape (terms acceptance; validation applied per-route inside scrape router)
+// Scrape (terms acceptance + validation)
 app.use('/api/scrape', termsAcceptance, scrapeRoutes);
 
 // ── 404 ──────────────────────────────────────────

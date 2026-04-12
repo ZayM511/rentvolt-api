@@ -47,6 +47,66 @@
         }
       }
     },
+    "/api/keys/free": {
+      "post": {
+        "summary": "Generate a free API key",
+        "description": "Generates a free-tier API key (100 requests/month). Rate-limited to 1 key per IP per day.",
+        "tags": ["Public"],
+        "responses": {
+          "200": {
+            "description": "API key generated",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "apiKey": "sk_live_abc123...",
+                  "plan": "free",
+                  "monthlyRequests": 100,
+                  "message": "Save this key! You won't be able to retrieve it again.",
+                  "docs": "/api-docs"
+                }
+              }
+            }
+          },
+          "429": { "description": "One free key per day limit reached" }
+        }
+      }
+    },
+    "/demo/listings": {
+      "get": {
+        "summary": "Try the API without authentication",
+        "description": "Returns rental listings for a supported city. Rate-limited to 3 requests per IP per 24 hours.",
+        "tags": ["Public"],
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "example": "oakland" },
+            "description": "City slug (e.g. oakland, san-francisco, new-york)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listings retrieved",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "listings": [
+                    { "source": "apartments.com", "price": 2500, "address": "123 Main St, Oakland, CA", "beds": "2 bed", "baths": "1 bath" }
+                  ],
+                  "total": 5,
+                  "sources": { "apartments": 2, "zillow": 3 }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid city" },
+          "429": { "description": "Demo rate limit reached (3/day)" }
+        }
+      }
+    },
     "/api/verify": {
       "get": {
         "summary": "Verify API key and check remaining quota",
@@ -57,7 +117,7 @@
             "description": "Key is valid",
             "content": {
               "application/json": {
-                "example": { "valid": true, "plan": "basic", "remaining": 950 }
+                "example": { "valid": true, "plan": "growth", "remaining": 950 }
               }
             }
           },
@@ -91,7 +151,12 @@
                   ],
                   "total": 40,
                   "sources": { "apartments": 10, "zillow": 10 },
-                  "query": { "city": "oakland", "state": "ca" }
+                  "query": { "city": "oakland", "state": "ca" },
+                  "meta": {
+                    "requestId": "abc-123",
+                    "plan": "growth",
+                    "remaining": 999
+                  }
                 }
               }
             }
@@ -103,7 +168,7 @@
     },
     "/api/scrape/bulk": {
       "post": {
-        "summary": "Bulk scrape multiple cities (Basic/Pro only)",
+        "summary": "Bulk scrape multiple cities (paid plans only: Growth/Scale/Enterprise)",
         "tags": ["Scrape"],
         "security": [{ "ApiKeyAuth": [] }],
         "requestBody": {
@@ -133,7 +198,21 @@
           }
         },
         "responses": {
-          "200": { "description": "Bulk results" },
+          "200": {
+            "description": "Bulk results",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "results": [
+                    { "city": "oakland", "state": "ca", "success": true, "listings": [], "total": 20 }
+                  ],
+                  "totalLocations": 1,
+                  "meta": { "requestId": "abc-123", "plan": "scale", "remaining": 4999 }
+                }
+              }
+            }
+          },
           "403": { "description": "Free plan cannot use bulk" }
         }
       }
@@ -147,11 +226,34 @@
         }
       }
     },
+    "/api/stripe/plans": {
+      "get": {
+        "summary": "List available subscription plans",
+        "tags": ["Billing"],
+        "responses": {
+          "200": {
+            "description": "Available plans",
+            "content": {
+              "application/json": {
+                "example": {
+                  "free": { "name": "RentVolt Starter", "price": "Free", "monthlyRequests": 100 },
+                  "paid": [
+                    { "id": "growth", "name": "RentVolt Growth", "price": "$19/mo", "monthlyRequests": 1000 },
+                    { "id": "scale", "name": "RentVolt Scale", "price": "$49/mo", "monthlyRequests": 5000 },
+                    { "id": "enterprise", "name": "RentVolt Enterprise", "price": "$149/mo", "monthlyRequests": 25000 }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stripe/checkout": {
       "post": {
-        "summary": "Create Stripe checkout session for plan upgrade",
+        "summary": "Create Stripe checkout session for a paid plan",
+        "description": "No authentication required. Redirects to Stripe-hosted checkout page.",
         "tags": ["Billing"],
-        "security": [{ "ApiKeyAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -160,14 +262,62 @@
                 "type": "object",
                 "required": ["plan"],
                 "properties": {
-                  "plan": { "type": "string", "enum": ["basic", "pro"] }
+                  "plan": { "type": "string", "enum": ["growth", "scale", "enterprise"] }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Checkout session with redirect URL" }
+          "200": {
+            "description": "Checkout session with redirect URL",
+            "content": {
+              "application/json": {
+                "example": {
+                  "sessionId": "cs_test_...",
+                  "url": "https://checkout.stripe.com/...",
+                  "plan": { "name": "RentVolt Growth", "price": "$19/mo", "monthlyRequests": 1000 }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid plan name" }
+        }
+      }
+    },
+    "/api/stripe/manage": {
+      "post": {
+        "summary": "Open Stripe billing portal for subscription management",
+        "tags": ["Billing"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["customerId"],
+                "properties": {
+                  "customerId": { "type": "string", "description": "Stripe customer ID" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Billing portal session URL" },
+          "400": { "description": "customerId is required" }
+        }
+      }
+    },
+    "/api/stripe/webhook": {
+      "post": {
+        "summary": "Stripe webhook handler",
+        "description": "Receives Stripe subscription events. Not intended for direct use.",
+        "tags": ["Billing"],
+        "responses": {
+          "200": { "description": "Webhook received" },
+          "400": { "description": "Invalid signature" }
         }
       }
     }

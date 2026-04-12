@@ -4,9 +4,9 @@ const crypto = require('crypto');
 
 // Default test keys (override with KEYS_FILE env var for production)
 const DEFAULT_KEYS = {
-  'sk_test_free_001': { plan: 'free', monthlyRequests: 50, used: 0, resetAt: null },
-  'sk_test_basic_002': { plan: 'growth', monthlyRequests: 1000, used: 0, resetAt: null },
-  'sk_test_pro_003': { plan: 'scale', monthlyRequests: 5000, used: 0, resetAt: null }
+  'sk_test_free_001': { plan: 'free', monthlyRequests: 100, used: 0, resetAt: null },
+  'sk_test_growth_002': { plan: 'growth', monthlyRequests: 1000, used: 0, resetAt: null },
+  'sk_test_scale_003': { plan: 'scale', monthlyRequests: 5000, used: 0, resetAt: null }
 };
 
 // In-memory store with periodic file persistence
@@ -49,8 +49,9 @@ const checkMonthlyReset = (keyData) => {
 const generateKey = (plan = 'free') => {
   const plans = {
     free: { monthlyRequests: 100 },
-    basic: { monthlyRequests: 1000 },
-    pro: { monthlyRequests: 10000 }
+    growth: { monthlyRequests: 1000 },
+    scale: { monthlyRequests: 5000 },
+    enterprise: { monthlyRequests: 25000 }
   };
   const prefix = process.env.NODE_ENV === 'production' ? 'sk_live_' : 'sk_test_';
   const key = prefix + crypto.randomBytes(24).toString('hex');
