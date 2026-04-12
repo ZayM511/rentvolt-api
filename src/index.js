@@ -51,7 +51,8 @@ app.use(helmet({
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
-      frameSrc: ["'none'"]
+      frameSrc: ["'none'"],
+      scriptSrcAttr: ["'unsafe-inline'"]
     }
   }
 }));
