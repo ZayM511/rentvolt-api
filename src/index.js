@@ -183,8 +183,11 @@ app.get('/api/verify', (req, res) => {
   });
 });
 
-// Stripe (needs terms acceptance + validation)
-app.use('/api/stripe', termsAcceptance, stripeRoutes);
+// Stripe — checkout/plans are public (for landing page), management routes need terms
+app.use('/api/stripe', (req, res, next) => {
+  if (req.path === '/checkout' || req.path === '/plans' || req.path === '/webhook') return next();
+  return termsAcceptance(req, res, next);
+}, stripeRoutes);
 
 // Scrape (terms acceptance; validation applied per-route inside scrape router)
 app.use('/api/scrape', termsAcceptance, scrapeRoutes);

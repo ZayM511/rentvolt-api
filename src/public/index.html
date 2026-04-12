@@ -62,8 +62,8 @@
     .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
     .nav-links a { color: var(--text-secondary); font-size: 0.95em; font-weight: 500; }
     .nav-links a:hover { color: var(--text-primary); opacity: 1; }
-    .nav-cta {
-      background: var(--accent); color: #0a0a1a; padding: 10px 24px;
+    .nav-cta, .nav-links a.nav-cta {
+      background: var(--accent); color: #0a0a1a !important; padding: 10px 24px;
       border-radius: var(--radius-sm); font-weight: 600; font-size: 0.9em;
       transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -460,7 +460,7 @@
       <li><a href="#tryit">Try It</a></li>
       <li><a href="#pricing">Pricing</a></li>
       <li><a href="/api-docs">Docs</a></li>
-      <li><a href="/api-docs" class="nav-cta">Get API Key</a></li>
+      <li><a href="#pricing" class="nav-cta">Get API Key</a></li>
     </ul>
   </nav>
 
@@ -694,7 +694,7 @@
           <li>Single city queries</li>
           <li>Community support</li>
         </ul>
-        <a href="/api-docs" class="pricing-btn pricing-btn-outline">Get Started</a>
+        <a href="/api-docs" class="pricing-btn pricing-btn-outline">Get Free API Key</a>
       </div>
       <div class="pricing-card">
         <h3>Growth</h3>
@@ -705,7 +705,7 @@
           <li>Bulk queries (10 cities)</li>
           <li>Email support</li>
         </ul>
-        <a href="/api-docs" class="pricing-btn pricing-btn-outline">Get Started</a>
+        <button class="pricing-btn pricing-btn-outline" onclick="startCheckout('growth')">Subscribe</button>
       </div>
       <div class="pricing-card popular">
         <div class="popular-badge">MOST POPULAR</div>
@@ -717,7 +717,7 @@
           <li>Bulk queries (10 cities)</li>
           <li>Priority support</li>
         </ul>
-        <a href="/api-docs" class="pricing-btn pricing-btn-primary">Get Started</a>
+        <button class="pricing-btn pricing-btn-primary" onclick="startCheckout('scale')">Subscribe</button>
       </div>
       <div class="pricing-card">
         <h3>Enterprise</h3>
@@ -728,7 +728,7 @@
           <li>Bulk queries (10 cities)</li>
           <li>Dedicated support</li>
         </ul>
-        <a href="/api-docs" class="pricing-btn pricing-btn-outline">Get Started</a>
+        <button class="pricing-btn pricing-btn-outline" onclick="startCheckout('enterprise')">Subscribe</button>
       </div>
     </div>
   </section>
@@ -953,5 +953,32 @@
     });
   </script>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+  <script>
+    async function startCheckout(plan) {
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Loading...';
+      try {
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan })
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert('Checkout unavailable right now. Please try again later.');
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      } catch (err) {
+        alert('Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+  </script>
 </body>
 </html>
