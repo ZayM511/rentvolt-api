@@ -356,7 +356,7 @@
       background: transparent; color: var(--text-primary);
       border: 1px solid rgba(255,255,255,0.2);
     }
-    .pricing-btn-outline:hover { border-color: rgba(255,255,255,0.4); opacity: 1; }
+    .pricing-btn-outline:hover { border-color: rgba(255,255,255,0.4); transform: translateY(-1px); opacity: 1; }
 
     /* ── CTA ───────────────────────── */
     .cta-section {
@@ -417,6 +417,40 @@
     .demo-message .btn { font-size: 0.9em; padding: 10px 24px; }
     .slow-notice { color: var(--text-muted); font-size: 0.85em; text-align: center; margin-top: 12px; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ── Toast Notification ────────── */
+    .toast-msg {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #1a1a2e; border: 1px solid rgba(255, 100, 100, 0.3); color: var(--text-primary);
+      padding: 14px 28px; border-radius: var(--radius-sm); font-size: 0.95em;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+      opacity: 0; transition: opacity 0.3s, transform 0.3s;
+    }
+    .toast-msg.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── API Key Result ────────────── */
+    .key-result {
+      margin-top: 16px; padding: 16px; border-radius: var(--radius-sm);
+      background: rgba(0, 212, 255, 0.08); border: 1px solid rgba(0, 212, 255, 0.2);
+      text-align: left; animation: fadeIn 0.3s;
+    }
+    .key-result .key-label { font-size: 0.75em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .key-result .key-value {
+      font-family: var(--font-mono); font-size: 0.85em; color: var(--accent);
+      background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 6px;
+      word-break: break-all; cursor: pointer; position: relative;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .key-result .key-value:hover { background: rgba(0,0,0,0.4); }
+    .key-result .key-hint { font-size: 0.75em; color: var(--text-muted); margin-top: 8px; }
+    .key-result .key-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .key-result .key-actions a, .key-result .key-actions button {
+      font-size: 0.8em; padding: 6px 14px; border-radius: 6px; cursor: pointer;
+      text-decoration: none; font-weight: 600; transition: all 0.2s;
+    }
+    .key-copy-btn { background: var(--accent); color: #0a0a1a; border: none; }
+    .key-copy-btn:hover { box-shadow: 0 2px 12px var(--accent-glow); }
+    .key-docs-link { background: transparent; color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; }
 
     /* ── Responsive (Tablet) ───────── */
     @media (max-width: 1024px) {
@@ -689,12 +723,13 @@
         <h3>Starter</h3>
         <div class="pricing-price">Free</div>
         <ul class="pricing-features">
-          <li>50 requests/month</li>
+          <li>100 requests/month</li>
           <li>All 6 sources</li>
           <li>Single city queries</li>
           <li>Community support</li>
         </ul>
-        <a href="/api-docs" class="pricing-btn pricing-btn-outline">Get Free API Key</a>
+        <button class="pricing-btn pricing-btn-outline" onclick="generateFreeKey(this)">Get Free API Key</button>
+        <div class="key-result" id="starterKeyResult" style="display:none"></div>
       </div>
       <div class="pricing-card">
         <h3>Growth</h3>
@@ -738,8 +773,9 @@
     <div class="cta-content">
       <h2>Start Building with RentVolt</h2>
       <p>Get your free API key and start querying 6 rental data sources today.</p>
-      <a href="/api-docs" class="btn btn-primary">&#9889; Get Free API Key</a>
-      <span class="cta-small">No credit card required &middot; 50 free requests per month</span>
+      <button class="btn btn-primary" onclick="generateFreeKey(this)" style="border:none;cursor:pointer">&#9889; Get Free API Key</button>
+      <div class="key-result" id="ctaKeyResult" style="display:none"></div>
+      <span class="cta-small">No credit card required &middot; 100 free requests per month</span>
     </div>
   </section>
 
@@ -756,15 +792,15 @@
           <li><a href="#features">Features</a></li>
           <li><a href="#pricing">Pricing</a></li>
           <li><a href="/api-docs">API Docs</a></li>
-          <li><a href="/health">Status</a></li>
+          <li><a href="https://stats.uptimerobot.com/" target="_blank" rel="noopener">Status</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <h4>Company</h4>
         <ul>
-          <li><a href="/legal">Legal</a></li>
-          <li><a href="/legal">Terms of Service</a></li>
-          <li><a href="/legal">Privacy Policy</a></li>
+          <li><a href="https://github.com/ZayM511/rentvolt-api/blob/main/legal/TermsOfService.md" target="_blank" rel="noopener">Terms of Service</a></li>
+          <li><a href="https://github.com/ZayM511/rentvolt-api/blob/main/legal/PrivacyPolicy.md" target="_blank" rel="noopener">Privacy Policy</a></li>
+          <li><a href="https://github.com/ZayM511/rentvolt-api/blob/main/legal/LegalDisclaimer.md" target="_blank" rel="noopener">Legal Disclaimer</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -915,7 +951,7 @@
         clearTimeout(slowTimer);
 
         if (res.status === 429) {
-          resultsBody.innerHTML = '<div class="demo-message"><span class="msg-icon">&#128274;</span><h4>Demo Limit Reached</h4><p>You\'ve used all 3 demo requests. Get a free API key to keep exploring.</p><a href="/api-docs" class="btn btn-primary" style="display:inline-flex">Get Free API Key</a></div>';
+          resultsBody.innerHTML = '<div class="demo-message"><span class="msg-icon">&#128274;</span><h4>Demo Limit Reached</h4><p>You\'ve used all 3 demo requests. Get a free API key to keep exploring.</p><a href="#pricing" class="btn btn-primary" style="display:inline-flex">Get Free API Key</a></div>';
           resultsCount.textContent = '';
           demoUsed = true;
           demoCount = DEMO_MAX;
@@ -954,11 +990,58 @@
   </script>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
   <script>
+    function showToast(msg) {
+      const existing = document.querySelector('.toast-msg');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = 'toast-msg';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('visible'));
+      setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 300); }, 4000);
+    }
+    async function generateFreeKey(btn) {
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+      try {
+        const res = await fetch('/api/keys/free', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.success && data.apiKey) {
+          btn.textContent = 'Key Generated!';
+          btn.style.opacity = '0.6';
+          const container = btn.closest('.pricing-card') || btn.parentElement;
+          const resultDiv = container.querySelector('.key-result');
+          if (resultDiv) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML =
+              '<div class="key-label">Your API Key</div>' +
+              '<div class="key-value" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{showToast(\'API key copied!\')})" title="Click to copy">' + data.apiKey + '</div>' +
+              '<div class="key-hint">Click the key to copy. Save it now — it won\'t be shown again.</div>' +
+              '<div class="key-actions">' +
+                '<button class="key-copy-btn" onclick="navigator.clipboard.writeText(\'' + data.apiKey + '\').then(()=>{showToast(\'Copied!\')})">Copy Key</button>' +
+                '<a href="/api-docs" class="key-docs-link">View Docs</a>' +
+              '</div>';
+          }
+        } else {
+          showToast(data.error || 'Could not generate key. Try again later.');
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      } catch (err) {
+        showToast('Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
     async function startCheckout(plan) {
       const btn = event.target;
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = 'Loading...';
+      btn.textContent = 'Redirecting...';
       try {
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST',
@@ -969,12 +1052,12 @@
         if (data.url) {
           window.location.href = data.url;
         } else {
-          alert('Checkout unavailable right now. Please try again later.');
+          showToast('Checkout unavailable right now. Please try again later.');
           btn.disabled = false;
           btn.textContent = originalText;
         }
       } catch (err) {
-        alert('Something went wrong. Please try again.');
+        showToast('Something went wrong. Please try again.');
         btn.disabled = false;
         btn.textContent = originalText;
       }

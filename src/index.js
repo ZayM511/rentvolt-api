@@ -111,6 +111,27 @@ app.get('/legal', (req, res) => {
   });
 });
 
+// ── Free API Key Generation ─────────────────────
+const freeKeyLimits = new Map();
+const { generateKey } = require('./middleware/apiKeyAuth');
+app.post('/api/keys/free', (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const last = freeKeyLimits.get(ip);
+  if (last && (Date.now() - last) < 24 * 60 * 60 * 1000) {
+    return res.status(429).json({ error: 'One free key per day. Check your email or notes for your existing key.' });
+  }
+  freeKeyLimits.set(ip, Date.now());
+  const key = generateKey('free');
+  res.json({
+    success: true,
+    apiKey: key,
+    plan: 'free',
+    monthlyRequests: 100,
+    message: 'Save this key! You won\'t be able to retrieve it again.',
+    docs: '/api-docs'
+  });
+});
+
 app.get('/', (req, res) => {
   const accept = req.headers.accept || '';
   if (accept.includes('text/html')) {

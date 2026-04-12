@@ -33,7 +33,7 @@ router.get('/plans', (req, res) => {
     monthlyRequests: plan.monthlyRequests
   }));
   res.json({
-    free: { name: 'RentVolt Starter', price: 'Free', monthlyRequests: 50 },
+    free: { name: 'RentVolt Starter', price: 'Free', monthlyRequests: 100 },
     paid: plans
   });
 });
