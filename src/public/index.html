@@ -186,6 +186,7 @@
     }
     .tryit-select:focus { outline: none; border-color: var(--accent); }
     .tryit-select option { background: #1a1a2e; color: var(--text-primary); }
+    .tryit-select optgroup { background: #0f1525; color: var(--text-secondary); font-style: normal; }
     .tryit-execute {
       width: 100%; padding: 14px; border-radius: var(--radius-sm);
       background: var(--accent); color: #0a0a1a; border: none;
@@ -572,7 +573,7 @@
             </select>
           </div>
           <button class="tryit-execute" id="executeBtn">&#9889; Execute Request</button>
-          <p class="tryit-note">Free demo &middot; One request per session &middot; Real data</p>
+          <p class="tryit-note">Free demo &middot; 3 requests per day &middot; Real data</p>
         </div>
         <div class="tryit-results" id="resultsPanel">
           <div class="tryit-results-header">
@@ -831,12 +832,19 @@
     const executeBtn = document.getElementById('executeBtn');
     const resultsBody = document.getElementById('resultsBody');
     const resultsCount = document.getElementById('resultsCount');
-    let demoUsed = sessionStorage.getItem('rentvolt_demo_used') === 'true';
+    const DEMO_MAX = 3;
+    let demoCount = parseInt(sessionStorage.getItem('rentvolt_demo_count') || '0', 10);
+    let demoUsed = demoCount >= DEMO_MAX;
 
-    if (demoUsed) {
-      executeBtn.disabled = true;
-      executeBtn.textContent = 'Demo Used';
+    function updateDemoBtn() {
+      if (demoUsed) {
+        executeBtn.disabled = true;
+        executeBtn.textContent = 'Demo Used (3/3)';
+      } else {
+        executeBtn.textContent = '\u26a1 Execute Request (' + demoCount + '/' + DEMO_MAX + ')';
+      }
     }
+    updateDemoBtn();
 
     function renderSkeleton() {
       let html = '<div class="listings-container">';
@@ -907,11 +915,12 @@
         clearTimeout(slowTimer);
 
         if (res.status === 429) {
-          resultsBody.innerHTML = '<div class="demo-message"><span class="msg-icon">&#128274;</span><h4>Demo Limit Reached</h4><p>You\'ve already tried the demo. Get a free API key to keep exploring.</p><a href="/api-docs" class="btn btn-primary" style="display:inline-flex">Get Free API Key</a></div>';
+          resultsBody.innerHTML = '<div class="demo-message"><span class="msg-icon">&#128274;</span><h4>Demo Limit Reached</h4><p>You\'ve used all 3 demo requests. Get a free API key to keep exploring.</p><a href="/api-docs" class="btn btn-primary" style="display:inline-flex">Get Free API Key</a></div>';
           resultsCount.textContent = '';
           demoUsed = true;
-          sessionStorage.setItem('rentvolt_demo_used', 'true');
-          executeBtn.textContent = 'Demo Used';
+          demoCount = DEMO_MAX;
+          sessionStorage.setItem('rentvolt_demo_count', String(DEMO_MAX));
+          updateDemoBtn();
           return;
         }
 
@@ -937,9 +946,10 @@
         return;
       }
 
-      demoUsed = true;
-      sessionStorage.setItem('rentvolt_demo_used', 'true');
-      executeBtn.textContent = 'Demo Used';
+      demoCount++;
+      sessionStorage.setItem('rentvolt_demo_count', String(demoCount));
+      demoUsed = demoCount >= DEMO_MAX;
+      updateDemoBtn();
     });
   </script>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>

@@ -30,12 +30,13 @@ const DEMO_CITIES = {
 };
 const demoRateLimits = new Map();
 const DEMO_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const DEMO_MAX_REQUESTS = 3;
 
 // Cleanup stale demo entries every hour
 setInterval(() => {
   const now = Date.now();
-  for (const [ip, timestamp] of demoRateLimits) {
-    if (now - timestamp > DEMO_COOLDOWN_MS) demoRateLimits.delete(ip);
+  for (const [ip, entry] of demoRateLimits) {
+    if (now - entry.firstUsed > DEMO_COOLDOWN_MS) demoRateLimits.delete(ip);
   }
 }, 60 * 60 * 1000);
 
@@ -147,16 +148,20 @@ app.get('/demo/listings', async (req, res) => {
   }
 
   const ip = req.ip || req.connection.remoteAddress;
-  const lastUsed = demoRateLimits.get(ip);
-  if (lastUsed && (Date.now() - lastUsed) < DEMO_COOLDOWN_MS) {
+  const entry = demoRateLimits.get(ip);
+  if (entry && (Date.now() - entry.firstUsed) < DEMO_COOLDOWN_MS && entry.count >= DEMO_MAX_REQUESTS) {
     return res.status(429).json({
       error: 'Demo limit reached',
-      message: "You've already tried the demo. Sign up for a free API key to continue.",
+      message: "You've used all 3 demo requests. Sign up for a free API key to continue.",
       docs: '/api-docs'
     });
   }
 
-  demoRateLimits.set(ip, Date.now());
+  if (!entry || (Date.now() - entry.firstUsed) >= DEMO_COOLDOWN_MS) {
+    demoRateLimits.set(ip, { firstUsed: Date.now(), count: 1 });
+  } else {
+    entry.count++;
+  }
 
   try {
     const results = await scrapeAll(city, state, { limit: 5, sortBy: 'price' });
