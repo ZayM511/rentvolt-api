@@ -12,6 +12,7 @@ const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 const openApiSpec = require('../openapi.json');
 const scrapeRoutes = require('./routes/scrape');
+const { scrapeAll } = require('./scrapers');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,8 +22,38 @@ const COMPANY = {
   jurisdiction: 'California, USA'
 };
 
+// ── Demo Rate Limiting ──────────────────────────
+const DEMO_CITIES = {
+  'oakland': 'ca', 'san-francisco': 'ca', 'los-angeles': 'ca', 'san-jose': 'ca',
+  'seattle': 'wa', 'portland': 'or', 'austin': 'tx', 'denver': 'co',
+  'chicago': 'il', 'new-york': 'ny', 'boston': 'ma', 'miami': 'fl'
+};
+const demoRateLimits = new Map();
+const DEMO_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+// Cleanup stale demo entries every hour
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, timestamp] of demoRateLimits) {
+    if (now - timestamp > DEMO_COOLDOWN_MS) demoRateLimits.delete(ip);
+  }
+}, 60 * 60 * 1000);
+
 // ── Security ─────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameSrc: ["'none'"]
+    }
+  }
+}));
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST'],
@@ -101,6 +132,39 @@ app.get('/', (req, res) => {
       checkout: 'POST /api/stripe/checkout'
     }
   });
+});
+
+// ── Demo Endpoint (unauthenticated, rate-limited) ─
+app.get('/demo/listings', async (req, res) => {
+  const city = (req.query.city || '').toLowerCase().trim();
+  const state = DEMO_CITIES[city];
+
+  if (!state) {
+    return res.status(400).json({
+      error: 'Invalid city',
+      validCities: Object.keys(DEMO_CITIES)
+    });
+  }
+
+  const ip = req.ip || req.connection.remoteAddress;
+  const lastUsed = demoRateLimits.get(ip);
+  if (lastUsed && (Date.now() - lastUsed) < DEMO_COOLDOWN_MS) {
+    return res.status(429).json({
+      error: 'Demo limit reached',
+      message: "You've already tried the demo. Sign up for a free API key to continue.",
+      docs: '/api-docs'
+    });
+  }
+
+  demoRateLimits.set(ip, Date.now());
+
+  try {
+    const results = await scrapeAll(city, state, { limit: 5, sortBy: 'price' });
+    res.json({ success: true, ...results });
+  } catch (err) {
+    console.error('[DEMO] Scrape error:', err.message);
+    res.status(500).json({ error: 'Demo request failed. Please try again.' });
+  }
 });
 
 // ── Authenticated Routes ─────────────────────────
