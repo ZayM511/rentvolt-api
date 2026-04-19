@@ -19,9 +19,26 @@ const client = () => {
 
 const fetchFmrByZip = async (zip, year) => {
   const api = client();
-  const y = year || new Date().getFullYear();
-  const { data } = await api.get(`/data/${zip}?year=${y}`);
-  return data;
+  // HUD publishes by fiscal year; the API 4xxs on years it hasn't loaded yet.
+  // Try current calendar year, then two prior fiscal years.
+  const candidates = year ? [year] : [
+    new Date().getFullYear(),
+    new Date().getFullYear() - 1,
+    new Date().getFullYear() - 2
+  ];
+  let lastErr;
+  for (const y of candidates) {
+    try {
+      const { data } = await api.get(`/data/${zip}?year=${y}`);
+      if (data) return data;
+    } catch (err) {
+      lastErr = err;
+      // Fall through to the next candidate year on 4xx; bail on 5xx.
+      if (err.response && err.response.status >= 500) throw err;
+    }
+  }
+  if (lastErr) throw lastErr;
+  return null;
 };
 
 const fetchFmrByStateCounty = async (state, county, year) => {
