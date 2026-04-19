@@ -17,8 +17,15 @@ const client = () => {
 
 // Map internal filter keys → RentCast query params.
 // https://developers.rentcast.io/reference/rental-long-term-listings
+const titleCase = (s) =>
+  String(s || '')
+    .trim()
+    .split(/[\s-]+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+
 const buildParams = (city, state, filters = {}) => {
-  const params = { city, state: String(state).toUpperCase(), status: 'Active' };
+  const params = { city: titleCase(city), state: String(state).toUpperCase(), status: 'Active' };
   if (filters.maxPrice != null) params.maxRent = filters.maxPrice;
   if (filters.minBeds != null) params.bedrooms = filters.minBeds;
   // RentCast uses a single bedrooms value, not min/max. If a range is given,

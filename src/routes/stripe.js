@@ -66,12 +66,12 @@ router.post('/checkout', async (req, res) => {
       customer_email: email || undefined,
       allow_promotion_codes: true,
       billing_address_collection: 'auto',
-      consent_collection: {
-        terms_of_service: 'required'
-      },
+      // NB: Stripe account is shared across Groundwork Labs products, so the
+      // account-level ToS URL is generic. RentVolt-specific ToS acceptance
+      // is captured by the submit message below + pricing-page disclosure.
       custom_text: {
         submit: {
-          message: 'By subscribing, you agree to our Terms of Service and authorize RentVolt to automatically charge your card each month at the listed price until you cancel. You can cancel anytime at /dashboard or via support@groundworklabs.io.'
+          message: 'By subscribing, you agree to RentVolt\'s Terms of Service (rentvolt-api.onrender.com/legal/tos) and authorize RentVolt to automatically charge your card each month at the listed price until you cancel. Cancel anytime at /dashboard or via support@groundworklabs.io.'
         }
       },
       metadata: {
