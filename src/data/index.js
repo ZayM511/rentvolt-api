@@ -114,7 +114,7 @@ const fetchListings = async (city, state, options = {}) => {
   return payload;
 };
 
-const fetchMarketTrends = async (zip) => {
+const fetchMarketTrends = async (zip, state) => {
   const out = { zip, sources: [] };
   try {
     const acs = await fetchAcsByZip(zip);
@@ -125,18 +125,20 @@ const fetchMarketTrends = async (zip) => {
   } catch (err) {
     out.censusError = err.message;
   }
-  try {
-    const fmr = await fetchFmrByZip(zip);
-    out.hud = summarizeFmr(fmr);
-    out.sources.push('hud');
-  } catch (err) {
-    out.hudError = err.message;
+  if (state) {
+    try {
+      const fmr = await fetchFmrByZip(zip, state);
+      out.hud = summarizeFmr(fmr);
+      out.sources.push('hud');
+    } catch (err) {
+      out.hudError = err.message;
+    }
   }
   return out;
 };
 
-const fetchBriefing = async (zip) => {
-  const trends = await fetchMarketTrends(zip);
+const fetchBriefing = async (zip, state) => {
+  const trends = await fetchMarketTrends(zip, state);
   const c = trends.census || {};
   const h = trends.hud?.fmr || {};
   const lines = [];

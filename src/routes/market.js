@@ -6,7 +6,8 @@ const { validateParam, schemas } = require('../middleware/validation');
 // ─── GET /api/market/trends/:zip ───────────────────────
 router.get('/trends/:zip', validateParam('zip', schemas.zip), async (req, res) => {
   try {
-    const data = await fetchMarketTrends(req.params.zip);
+    const state = typeof req.query.state === 'string' ? req.query.state.trim() : null;
+    const data = await fetchMarketTrends(req.params.zip, state);
     res.json({
       success: true,
       ...data,
@@ -30,7 +31,8 @@ router.get('/trends/:zip', validateParam('zip', schemas.zip), async (req, res) =
 // One-paragraph, LLM-friendly market briefing (Lever 3: AI-agent DX)
 router.get('/briefing/:zip', validateParam('zip', schemas.zip), async (req, res) => {
   try {
-    const data = await fetchBriefing(req.params.zip);
+    const state = typeof req.query.state === 'string' ? req.query.state.trim() : null;
+    const data = await fetchBriefing(req.params.zip, state);
     res.json({
       success: true,
       ...data,

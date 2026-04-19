@@ -1,9 +1,9 @@
 const axios = require('axios');
 
-// HUD User API (free; requires a token registered at huduser.gov).
-// Fair Market Rents by ZIP / metro. No rate limit documented; be polite.
+// HUD User API (free; requires a token at huduser.gov).
+// Fair Market Rents. No rate limit documented; be polite and cache.
 const HUD_BASE = 'https://www.huduser.gov/hudapi/public/fmr';
-const TIMEOUT_MS = 10000;
+const TIMEOUT_MS = 15000;
 
 const client = () => {
   const token = process.env.HUD_API_TOKEN;
@@ -17,46 +17,121 @@ const client = () => {
   });
 };
 
-const fetchFmrByZip = async (zip, year) => {
+// ─── Caches (in-process; survive within a single Render instance) ──────────
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 1 day
+const metroListCache = new Map();  // `${state}:${year}` → { metros, expiresAt }
+const metroFmrCache  = new Map();  // metroId → { data, year, expiresAt }
+const zipMetroCache  = new Map();  // `${state}:${zip}` → metroId
+
+// ─── Low-level HUD calls ───────────────────────────────────────────────────
+async function listMetrosForState(state, year) {
+  const key = `${state.toUpperCase()}:${year}`;
+  const cached = metroListCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.metros;
   const api = client();
-  // HUD publishes by fiscal year; the API 4xxs on years it hasn't loaded yet.
-  // Also, not every ZIP is in HUD's Small Area FMR dataset — only those inside
-  // HUD-designated SAFMR metros. Non-SAFMR ZIPs return 400 even with a valid
-  // token. So we try: (1) current-year ZIP → (2) prior-year ZIP → (3) current-year
-  // with no year param (HUD defaults to latest published). After that, give up.
+  const { data } = await api.get(`/listMetroAreas/${state.toUpperCase()}?year=${year}`);
+  const metros = data?.data?.metroareas
+    || data?.metroareas
+    || (Array.isArray(data?.data) ? data.data : [])
+    || [];
+  metroListCache.set(key, { metros, expiresAt: Date.now() + CACHE_TTL_MS });
+  return metros;
+}
+
+async function fetchMetroFmr(metroId, year) {
+  const cached = metroFmrCache.get(metroId);
+  if (cached && cached.year === year && cached.expiresAt > Date.now()) return cached.data;
+  const api = client();
+  const { data } = await api.get(`/data/${metroId}?year=${year}`);
+  metroFmrCache.set(metroId, { data, year, expiresAt: Date.now() + CACHE_TTL_MS });
+  return data;
+}
+
+function metroIdOf(metroEntry) {
+  return metroEntry?.code || metroEntry?.cbsa_code || metroEntry?.id || metroEntry?.entity_id || null;
+}
+
+function basicDataArrayOf(metroResponse) {
+  const bd = metroResponse?.data?.basicdata;
+  if (Array.isArray(bd)) return bd;
+  if (bd && typeof bd === 'object') return [bd]; // some responses return a single object
+  return [];
+}
+
+// ─── ZIP → metro resolver ──────────────────────────────────────────────────
+// Finds the HUD metro that publishes SAFMR data for the given ZIP. Returns
+// { metroId, zipRow } when found. Falls back to MSA-level FMR if SAFMR is
+// not available for this ZIP. Throws if nothing can be resolved.
+async function findFmrForZip(zip, state, year) {
+  const cacheKey = `${state.toUpperCase()}:${zip}`;
+  const cachedMetro = zipMetroCache.get(cacheKey);
+  const metros = await listMetrosForState(state, year);
+  if (metros.length === 0) {
+    throw new Error(`No HUD metros listed for state ${state} year ${year}`);
+  }
+
+  // Tight path: we already know the metro for this ZIP
+  if (cachedMetro) {
+    const fmr = await fetchMetroFmr(cachedMetro, year);
+    const row = basicDataArrayOf(fmr).find((r) => String(r.zip_code) === String(zip));
+    if (row) return { metroId: cachedMetro, zipRow: row };
+  }
+
+  // Fan out: fetch FMR for every metro in the state in parallel, hunt for ZIP
+  const results = await Promise.allSettled(
+    metros.map((m) => {
+      const id = metroIdOf(m);
+      return id ? fetchMetroFmr(id, year).then((data) => ({ id, data })) : Promise.reject(new Error('no metroId'));
+    })
+  );
+
+  let msaLevelFallback = null;
+  for (const r of results) {
+    if (r.status !== 'fulfilled') continue;
+    const { id, data } = r.value;
+    for (const row of basicDataArrayOf(data)) {
+      const z = String(row.zip_code || '');
+      // Build up the ZIP → metro mapping opportunistically for future hits
+      if (/^\d{5}$/.test(z)) {
+        zipMetroCache.set(`${state.toUpperCase()}:${z}`, id);
+      }
+      if (z === String(zip)) {
+        return { metroId: id, zipRow: row };
+      }
+      // Remember the MSA-level row of the first metro we see so we can fall back
+      if (!msaLevelFallback && (z === 'MSA level' || z === 'MSA Level' || /^MSA/i.test(z))) {
+        msaLevelFallback = { metroId: id, zipRow: row };
+      }
+    }
+  }
+
+  // SAFMR didn't cover this ZIP — return MSA-level FMR as a reasonable fallback
+  if (msaLevelFallback) return msaLevelFallback;
+  throw new Error(`ZIP ${zip} not found in HUD FMR data for state ${state} year ${year}`);
+}
+
+// ─── Public API ────────────────────────────────────────────────────────────
+const fetchFmrByZip = async (zip, state, year) => {
+  if (!state) {
+    throw Object.assign(new Error('state is required to resolve HUD FMR by ZIP'), { status: 400 });
+  }
   const years = year ? [year] : [
     new Date().getFullYear(),
     new Date().getFullYear() - 1,
     new Date().getFullYear() - 2
   ];
-  // Note: HUD's /fmr/data/{entityid} endpoint takes a HUD metro ID (e.g.
-  // METRO41940M41940), not a ZIP. Direct ZIP queries 400 with "Missing or
-  // invalid value in the query parameter(s)". Proper ZIP-level (Small Area)
-  // FMR requires: state → list metros → pick metro → fetch data → find ZIP
-  // in basicdata[]. That's a bigger integration we'll ship later. For now we
-  // try the documented URL (in case HUD opens a direct-ZIP path) and
-  // propagate the error so marketContext can degrade gracefully.
-  const attempts = years.map((y) => `/data/${zip}?year=${y}`).concat([`/data/${zip}`]);
   let lastErr;
-  for (const path of attempts) {
+  for (const y of years) {
     try {
-      const { data } = await api.get(path);
-      if (data) return data;
+      const { metroId, zipRow } = await findFmrForZip(zip, state, y);
+      // Shape to match summarizeFmr's expectation: { data: { basicdata: <row> } }
+      return { data: { basicdata: { ...zipRow, year: y, metroId } } };
     } catch (err) {
       lastErr = err;
       if (err.response && err.response.status >= 500) throw err;
     }
   }
-  if (lastErr) {
-    const status = lastErr.response?.status;
-    const body = typeof lastErr.response?.data === 'string'
-      ? lastErr.response.data.slice(0, 140)
-      : JSON.stringify(lastErr.response?.data || {}).slice(0, 140);
-    const e = new Error(`HUD FMR ${status || 'error'} for zip ${zip}: ${body || lastErr.message}`);
-    e.status = status;
-    throw e;
-  }
-  return null;
+  throw lastErr || new Error(`HUD FMR not available for ZIP ${zip} state ${state}`);
 };
 
 const fetchFmrByStateCounty = async (state, county, year) => {
@@ -73,6 +148,7 @@ const summarizeFmr = (raw) => {
     source: 'hud.fmr',
     zip: d.zip_code || d.zipcode || null,
     year: d.year || null,
+    metroId: d.metroId || null,
     fmr: {
       efficiency: d.Efficiency ?? d.efficiency ?? null,
       oneBr: d['One-Bedroom'] ?? d.onebedroom ?? null,

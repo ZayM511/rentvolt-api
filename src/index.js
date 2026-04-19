@@ -385,7 +385,7 @@ app.get('/demo/listings', async (req, res) => {
     if (firstZip) {
       const { fetchMarketTrends } = require('./data');
       try {
-        const trends = await fetchMarketTrends(firstZip);
+        const trends = await fetchMarketTrends(firstZip, state);
         if (trends.hud) sourcesPresent.push('hud');
         if (trends.census) sourcesPresent.push('census');
         marketContext = {
