@@ -30,7 +30,7 @@ const COMPANY = {
   type: 'California Limited Liability Company',
   entityId: 'B20260059957',
   jurisdiction: 'California, USA',
-  address: '2108 N St Ste N, Sacramento, CA 95816, USA',
+  address: 'California, USA',
   supportEmail: 'support@groundworklabs.io',
   privacyEmail: 'support@groundworklabs.io',
   legalEmail: 'legal@groundworklabs.io'
@@ -225,7 +225,7 @@ function renderLegalPage(slug, bodyHtml) {
 </nav>
 <article>${bodyHtml}</article>
 <footer>
-  © 2026 Groundwork Labs LLC · California · Entity B20260059957 · 2108 N St Ste N, Sacramento, CA 95816 · support@groundworklabs.io
+  © 2026 Groundwork Labs LLC · California · Entity B20260059957 · support@groundworklabs.io
 </footer>
 </body></html>`;
 }
@@ -430,13 +430,21 @@ app.post('/api/subscribe', async (req, res) => {
     if (!/.+@.+\..+/.test(email) || email.length > 254) {
       return res.status(400).json({ error: 'Enter a valid email address' });
     }
-    await db.query(
+    const ins = await db.query(
       `INSERT INTO newsletter_subscribers (email, source, ip)
          VALUES ($1, $2, $3::inet)
-       ON CONFLICT (email) DO UPDATE SET source = COALESCE(newsletter_subscribers.source, EXCLUDED.source)`,
+       ON CONFLICT (email) DO UPDATE SET source = COALESCE(newsletter_subscribers.source, EXCLUDED.source)
+       RETURNING (xmax = 0) AS is_new`,
       [email, source, req.ip]
     );
-    res.json({ success: true, message: 'Subscribed. You\'ll hear from us when we ship something worth your inbox.' });
+    // Send a confirmation email only on first subscription (not on re-subscribes)
+    if (ins.rows[0]?.is_new) {
+      const { sendSubscribeConfirmation } = require('./email');
+      sendSubscribeConfirmation({ to: email }).catch((err) =>
+        console.warn('[subscribe] confirmation email failed:', err.message)
+      );
+    }
+    res.json({ success: true, message: 'Subscribed. Check your inbox for a welcome note.' });
   } catch (err) {
     console.error('[subscribe] error:', err.message);
     res.status(500).json({ error: 'Could not subscribe. Try again later.' });
@@ -449,12 +457,13 @@ app.post('/api/demo-request', async (req, res) => {
     const b = req.body || {};
     const email = String(b.email || '').toLowerCase().trim();
     if (!/.+@.+\..+/.test(email)) return res.status(400).json({ error: 'Enter a valid email' });
-    const { sendMagicLinkEmail, send } = require('./email');
+    const { send, sendDemoRequestConfirmation } = require('./email');
     await db.query(
       `INSERT INTO demo_requests (email, company, use_case, volume, notes, ip)
          VALUES ($1, $2, $3, $4, $5, $6::inet)`,
       [email, b.company || null, b.useCase || null, b.volume || null, b.notes || null, req.ip]
     );
+    // Notify sales
     send({
       to: 'sales@groundworklabs.io',
       subject: `[RentVolt] Demo request from ${email}`,
@@ -467,7 +476,11 @@ app.post('/api/demo-request', async (req, res) => {
           <li><b>Notes:</b> ${(b.notes || '—').replace(/[<>]/g, '')}</li>
         </ul>`
     }).catch((err) => console.warn('[demo-request] sales email failed:', err.message));
-    res.json({ success: true, message: 'Thanks — a human will reply within one business day.' });
+    // Confirm to the requester
+    sendDemoRequestConfirmation({ to: email, company: b.company || '' }).catch((err) =>
+      console.warn('[demo-request] confirmation email failed:', err.message)
+    );
+    res.json({ success: true, message: 'Thanks — we sent you a confirmation email, and a human will reply within one business day.' });
   } catch (err) {
     console.error('[demo-request] error:', err.message);
     res.status(500).json({ error: 'Could not submit request' });

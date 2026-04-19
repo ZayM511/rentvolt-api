@@ -34,7 +34,7 @@ const welcomeTemplate = ({ plan, apiKey }) => `
       Your subscription auto-renews monthly. Cancel anytime at
       <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/dashboard">/dashboard</a>
       or by replying to this email.<br><br>
-      Groundwork Labs LLC · 2108 N St Ste N, Sacramento, CA 95816 · support@groundworklabs.io
+      Groundwork Labs LLC · California, USA · support@groundworklabs.io
     </p>
   </body></html>
 `;
@@ -58,6 +58,29 @@ const usageAlertTemplate = ({ plan, used, limit, pct }) => `
   </body></html>
 `;
 
+const subscribeTemplate = () => `
+  <!doctype html>
+  <html><body style="font-family: -apple-system, Segoe UI, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; color: #111;">
+    <h1 style="color: #0a0a1a;">You're on the list ⚡</h1>
+    <p>Thanks for subscribing to the RentVolt changelog. We'll email you when we ship new endpoints, price changes, or deprecations — nothing else.</p>
+    <p style="font-size: 12px; color: #666;">Reply with "unsubscribe" anytime and we'll remove you within 24 hours. — Groundwork Labs LLC</p>
+  </body></html>
+`;
+
+const demoRequestConfirmationTemplate = ({ company }) => `
+  <!doctype html>
+  <html><body style="font-family: -apple-system, Segoe UI, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; color: #111;">
+    <h1 style="color: #0a0a1a;">Thanks — we got your demo request</h1>
+    <p>A human at Groundwork Labs will reply within one business day from <a href="mailto:sales@groundworklabs.io">sales@groundworklabs.io</a>${company ? ` regarding <strong>${escape(company)}</strong>` : ''}.</p>
+    <p>In the meantime, feel free to:</p>
+    <ul>
+      <li>Grab a free API key at <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/pricing">/pricing</a> (100 req/mo, no card)</li>
+      <li>Skim the docs at <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/api-docs">/api-docs</a></li>
+    </ul>
+    <p style="font-size: 12px; color: #666;">— The Groundwork Labs team</p>
+  </body></html>
+`;
+
 const sendWelcomeEmail = ({ to, plan, apiKey }) =>
   send({ to, subject: 'Welcome to RentVolt — your API key is ready', html: welcomeTemplate({ plan, apiKey }) });
 
@@ -67,4 +90,17 @@ const sendMagicLinkEmail = ({ to, link }) =>
 const sendUsageAlertEmail = ({ to, plan, used, limit, pct }) =>
   send({ to, subject: `RentVolt: ${pct}% of monthly quota used`, html: usageAlertTemplate({ plan, used, limit, pct }) });
 
-module.exports = { send, sendWelcomeEmail, sendMagicLinkEmail, sendUsageAlertEmail };
+const sendSubscribeConfirmation = ({ to }) =>
+  send({ to, subject: "You're on the RentVolt list", html: subscribeTemplate() });
+
+const sendDemoRequestConfirmation = ({ to, company }) =>
+  send({ to, subject: 'Thanks — your RentVolt demo request is in', html: demoRequestConfirmationTemplate({ company }) });
+
+module.exports = {
+  send,
+  sendWelcomeEmail,
+  sendMagicLinkEmail,
+  sendUsageAlertEmail,
+  sendSubscribeConfirmation,
+  sendDemoRequestConfirmation
+};

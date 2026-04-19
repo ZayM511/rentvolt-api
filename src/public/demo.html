@@ -18,6 +18,7 @@
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:32px}
   label{display:block;margin:16px 0 6px;color:var(--muted);font-size:13px;font-weight:500}
   input,select,textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--fg);padding:12px 14px;border-radius:8px;font:inherit;font-size:14px}
+  select option,select optgroup{background:#0a0a1a;color:var(--fg)}
   textarea{min-height:90px;resize:vertical}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
   .btn{width:100%;background:var(--accent);color:#000;padding:14px;border:none;border-radius:8px;font-weight:600;font-size:15px;cursor:pointer;margin-top:24px}
@@ -56,45 +57,6 @@
       <p class="foot">By submitting, you agree to our <a href="/legal/privacy" style="color:var(--accent)">Privacy Policy</a>. We'll reach out from sales@groundworklabs.io.</p>
     </form>
   </div>
-<script>
-document.getElementById('demo-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const f = e.target;
-  const btn = document.getElementById('submit-btn');
-  const ok = document.getElementById('ok');
-  const err = document.getElementById('err');
-  ok.style.display = 'none'; err.style.display = 'none';
-  btn.disabled = true; btn.textContent = 'Sending…';
-  const data = {
-    email: f.email.value.trim(),
-    company: f.company.value.trim() || undefined,
-    useCase: f.useCase.value.trim() || undefined,
-    volume: f.volume.value || undefined,
-    notes: f.notes.value.trim() || undefined
-  };
-  try {
-    const res = await fetch('/api/demo-request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const j = await res.json();
-    if (res.ok) {
-      ok.textContent = j.message || 'Thanks — we\'ll be in touch within one business day.';
-      ok.style.display = 'block';
-      f.reset();
-    } else {
-      err.textContent = j.error || 'Could not submit. Please try again or email sales@groundworklabs.io directly.';
-      err.style.display = 'block';
-    }
-  } catch {
-    err.textContent = 'Network error. Email sales@groundworklabs.io and we\'ll respond the same way.';
-    err.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Request demo';
-  }
-});
-</script>
+<script src="/demo.js" defer></script>
 </body>
 </html>
