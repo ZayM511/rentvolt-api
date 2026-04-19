@@ -11,6 +11,6 @@ dist/
 # Claude Code / local agent memory — not part of the repo
 memory/
 # Legacy key-store file (pre-DB) — never commit
-data/api-keys.json
-data/
+/data/api-keys.json
+/data/
 
