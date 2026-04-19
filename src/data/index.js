@@ -7,10 +7,10 @@ const { query } = require('../db');
 // unit economics. Free-tier users don't need real-time data; enterprise
 // customers usually do.
 const CACHE_TTL_BY_PLAN = {
-  free:       24 * 60 * 60, // 24h
+  free:       48 * 60 * 60, // 48h — free users tolerate slightly stale data
   growth:     12 * 60 * 60, // 12h
   scale:       6 * 60 * 60, // 6h
-  enterprise:  3 * 60 * 60  // 3h
+  enterprise:  3 * 60 * 60  // 3h (Business tier, real-time needs)
 };
 const DEFAULT_CACHE_TTL = 12 * 60 * 60;
 const ttlFor = (plan) => CACHE_TTL_BY_PLAN[plan] || DEFAULT_CACHE_TTL;
