@@ -29,7 +29,9 @@ async function listMetrosForState(state, year) {
   const cached = metroListCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.metros;
   const api = client();
-  const { data } = await api.get(`/listMetroAreas/${state.toUpperCase()}?year=${year}`);
+  // HUD's documented endpoint is /fmr/statedata/{state}?year=Y
+  // It returns both metroareas[] and counties[] under data.
+  const { data } = await api.get(`/statedata/${state.toUpperCase()}?year=${year}`);
   const metros = data?.data?.metroareas
     || data?.metroareas
     || (Array.isArray(data?.data) ? data.data : [])
