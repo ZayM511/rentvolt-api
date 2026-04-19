@@ -6,17 +6,17 @@
   <title>RentVolt — Rental market intelligence for the internet</title>
   <meta name="description" content="Live rental listings, HUD Fair Market Rent, and Census context in one API call. Built for AI agents, indie builders, and property-tech teams. 140M+ US properties.">
   <meta name="theme-color" content="#0a0a1a">
-  <link rel="canonical" href="https://rentvolt-api.onrender.com/">
+  <link rel="canonical" href="https://rentvolt.io/">
   <meta property="og:title" content="RentVolt — Rental market intelligence for the internet">
   <meta property="og:description" content="Live rental listings, HUD Fair Market Rent, and Census context in one API call. 140M+ US properties. Cancel anytime.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://rentvolt-api.onrender.com/">
-  <meta property="og:image" content="https://rentvolt-api.onrender.com/og.png">
+  <meta property="og:url" content="https://rentvolt.io/">
+  <meta property="og:image" content="https://rentvolt.io/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="RentVolt">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://rentvolt-api.onrender.com/og.png">
+  <meta name="twitter:image" content="https://rentvolt.io/og.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -28,11 +28,11 @@
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://rentvolt-api.onrender.com/#org",
+        "@id": "https://rentvolt.io/#org",
         "name": "Groundwork Labs LLC",
         "legalName": "Groundwork Labs LLC",
-        "url": "https://rentvolt-api.onrender.com/",
-        "logo": "https://rentvolt-api.onrender.com/og.png",
+        "url": "https://rentvolt.io/",
+        "logo": "https://rentvolt.io/og.png",
         "address": {
           "@type": "PostalAddress",
           "addressRegion": "CA",
@@ -50,7 +50,7 @@
         "name": "RentVolt API",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Any (HTTP/REST)",
-        "publisher": { "@id": "https://rentvolt-api.onrender.com/#org" },
+        "publisher": { "@id": "https://rentvolt.io/#org" },
         "offers": [
           { "@type": "Offer", "name": "Starter",    "price": "0",   "priceCurrency": "USD" },
           { "@type": "Offer", "name": "Growth",     "price": "19",  "priceCurrency": "USD" },
@@ -58,7 +58,7 @@
           { "@type": "Offer", "name": "Business",   "price": "149", "priceCurrency": "USD" }
         ],
         "description": "Rental market intelligence API — live listings, HUD Fair Market Rent, and Census ACS context in one call.",
-        "url": "https://rentvolt-api.onrender.com/"
+        "url": "https://rentvolt.io/"
       }
     ]
   }
@@ -726,10 +726,10 @@
       <div class="hero-code" aria-label="Example API call">
         <div class="hero-code-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-          <span class="file">curl · rentvolt-api.onrender.com</span>
+          <span class="file">curl · rentvolt.io</span>
         </div>
         <pre class="hero-code-body"><code><span class="c-cmt"># Get rental listings for any US city</span>
-<span class="c-cmd">$</span> curl https://rentvolt-api.onrender.com/demo/listings \
+<span class="c-cmd">$</span> curl https://rentvolt.io/demo/listings \
      ?city=oakland&amp;state=ca
 
 <span class="c-arr">→</span> 200 OK <span class="c-cmt">(147ms · rentcast + hud + census)</span>
@@ -863,10 +863,10 @@
             <button class="snippet-tab" data-lang="llm" role="tab">LLM tool</button>
             <button class="snippet-copy" id="snippetCopy" style="margin-left:auto;background:transparent;color:var(--accent);border:1px solid rgba(255,255,255,.12);padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer">Copy</button>
           </div>
-          <div class="snippet-panel active" data-lang="curl" data-template='curl "https://rentvolt-api.onrender.com/demo/listings?city={CITY}&state=ca"'><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code>curl "https://rentvolt-api.onrender.com/demo/listings?city={CITY}&amp;state=ca"</code></pre></div>
-          <div class="snippet-panel" data-lang="node" data-template="const res = await fetch(&quot;https://rentvolt-api.onrender.com/api/scrape/listings&quot;, {&#10;  method: &quot;POST&quot;,&#10;  headers: { &quot;Content-Type&quot;: &quot;application/json&quot;, &quot;x-api-key&quot;: process.env.RENTVOLT_KEY },&#10;  body: JSON.stringify({ city: &quot;{CITY}&quot;, state: &quot;ca&quot; })&#10;});&#10;const { listings } = await res.json();"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
-          <div class="snippet-panel" data-lang="python" data-template="import os, requests&#10;r = requests.post(&#10;    &quot;https://rentvolt-api.onrender.com/api/scrape/listings&quot;,&#10;    json={&quot;city&quot;: &quot;{CITY}&quot;, &quot;state&quot;: &quot;ca&quot;},&#10;    headers={&quot;x-api-key&quot;: os.environ[&quot;RENTVOLT_KEY&quot;]},&#10;)&#10;print(r.json()[&quot;listings&quot;])"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
-          <div class="snippet-panel" data-lang="go" data-template="body := strings.NewReader(`{&quot;city&quot;:&quot;{CITY}&quot;,&quot;state&quot;:&quot;ca&quot;}`)&#10;req, _ := http.NewRequest(&quot;POST&quot;, &quot;https://rentvolt-api.onrender.com/api/scrape/listings&quot;, body)&#10;req.Header.Set(&quot;Content-Type&quot;, &quot;application/json&quot;)&#10;req.Header.Set(&quot;x-api-key&quot;, os.Getenv(&quot;RENTVOLT_KEY&quot;))&#10;resp, _ := http.DefaultClient.Do(req)"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
+          <div class="snippet-panel active" data-lang="curl" data-template='curl "https://rentvolt.io/demo/listings?city={CITY}&state=ca"'><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code>curl "https://rentvolt.io/demo/listings?city={CITY}&amp;state=ca"</code></pre></div>
+          <div class="snippet-panel" data-lang="node" data-template="const res = await fetch(&quot;https://rentvolt.io/api/scrape/listings&quot;, {&#10;  method: &quot;POST&quot;,&#10;  headers: { &quot;Content-Type&quot;: &quot;application/json&quot;, &quot;x-api-key&quot;: process.env.RENTVOLT_KEY },&#10;  body: JSON.stringify({ city: &quot;{CITY}&quot;, state: &quot;ca&quot; })&#10;});&#10;const { listings } = await res.json();"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
+          <div class="snippet-panel" data-lang="python" data-template="import os, requests&#10;r = requests.post(&#10;    &quot;https://rentvolt.io/api/scrape/listings&quot;,&#10;    json={&quot;city&quot;: &quot;{CITY}&quot;, &quot;state&quot;: &quot;ca&quot;},&#10;    headers={&quot;x-api-key&quot;: os.environ[&quot;RENTVOLT_KEY&quot;]},&#10;)&#10;print(r.json()[&quot;listings&quot;])"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
+          <div class="snippet-panel" data-lang="go" data-template="body := strings.NewReader(`{&quot;city&quot;:&quot;{CITY}&quot;,&quot;state&quot;:&quot;ca&quot;}`)&#10;req, _ := http.NewRequest(&quot;POST&quot;, &quot;https://rentvolt.io/api/scrape/listings&quot;, body)&#10;req.Header.Set(&quot;Content-Type&quot;, &quot;application/json&quot;)&#10;req.Header.Set(&quot;x-api-key&quot;, os.Getenv(&quot;RENTVOLT_KEY&quot;))&#10;resp, _ := http.DefaultClient.Do(req)"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
           <div class="snippet-panel" data-lang="llm" data-template='{&#10;  &quot;name&quot;: &quot;rentvolt_search&quot;,&#10;  &quot;description&quot;: &quot;Search live rental listings for a US city, with HUD+Census context.&quot;,&#10;  &quot;input_schema&quot;: {&#10;    &quot;type&quot;: &quot;object&quot;,&#10;    &quot;properties&quot;: {&#10;      &quot;city&quot;:  { &quot;type&quot;: &quot;string&quot;, &quot;examples&quot;: [&quot;{CITY}&quot;] },&#10;      &quot;state&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;pattern&quot;: &quot;^[a-z]{2}$&quot; }&#10;    },&#10;    &quot;required&quot;: [&quot;city&quot;, &quot;state&quot;]&#10;  }&#10;}'><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
         </div>
         <div class="tryit-results" id="resultsPanel">
@@ -942,7 +942,7 @@
       <div class="code-block-wrapper">
         <button class="copy-btn" id="copyBtn">Copy</button>
         <div class="code-block">
-          <div class="code-panel active" id="panel-request"><pre><span class="t-method">POST</span> <span class="t-url">https://rentvolt-api.onrender.com/api/scrape/listings</span>
+          <div class="code-panel active" id="panel-request"><pre><span class="t-method">POST</span> <span class="t-url">https://rentvolt.io/api/scrape/listings</span>
 <span class="t-header">Content-Type:</span> <span class="t-string">application/json</span>
 <span class="t-header">x-api-key:</span> <span class="t-string">YOUR_API_KEY</span>
 

@@ -10,7 +10,7 @@
 - **California Secretary of State Entity ID:** B20260059957
 - **Jurisdiction of Formation:** State of California, USA
 - **Registered Office / Registered Agent Address:** 2108 N St Ste N, Sacramento, Sacramento County, CA 95816, USA
-- **Product:** RentVolt API (https://rentvolt-api.onrender.com)
+- **Product:** RentVolt API (https://rentvolt.io)
 - **Primary contact:** `legal@groundworklabs.io`
 
 ## 2. California Business Compliance

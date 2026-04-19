@@ -60,7 +60,7 @@ app.use(helmet({
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production'
-    ? 'https://rentvolt-api.onrender.com'
+    ? 'https://rentvolt.io'
     : '*'),
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'x-api-key']

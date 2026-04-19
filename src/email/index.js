@@ -22,17 +22,17 @@ const welcomeTemplate = ({ plan, apiKey }) => `
     <h1 style="color: #0a0a1a;">Welcome to RentVolt ⚡</h1>
     <p>Your <strong>${escape(plan)}</strong> plan is active. Here's your API key:</p>
     <pre style="background: #f4f4f7; padding: 16px; border-radius: 8px; word-break: break-all; font-size: 13px;">${escape(apiKey)}</pre>
-    <p><strong>Keep this safe.</strong> It grants full access to your RentVolt quota. You can view usage and rotate keys at <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/dashboard">/dashboard</a>.</p>
+    <p><strong>Keep this safe.</strong> It grants full access to your RentVolt quota. You can view usage and rotate keys at <a href="${process.env.BASE_URL || 'https://rentvolt.io'}/dashboard">/dashboard</a>.</p>
     <h3>Quickstart</h3>
-    <pre style="background: #f4f4f7; padding: 16px; border-radius: 8px; font-size: 12px; overflow-x: auto;">curl -X POST ${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/api/scrape/listings \\
+    <pre style="background: #f4f4f7; padding: 16px; border-radius: 8px; font-size: 12px; overflow-x: auto;">curl -X POST ${process.env.BASE_URL || 'https://rentvolt.io'}/api/scrape/listings \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: ${escape(apiKey)}" \\
   -d '{"city":"oakland","state":"ca"}'</pre>
-    <p>Full docs: <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/api-docs">/api-docs</a></p>
+    <p>Full docs: <a href="${process.env.BASE_URL || 'https://rentvolt.io'}/api-docs">/api-docs</a></p>
     <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
     <p style="font-size: 12px; color: #666;">
       Your subscription auto-renews monthly. Cancel anytime at
-      <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/dashboard">/dashboard</a>
+      <a href="${process.env.BASE_URL || 'https://rentvolt.io'}/dashboard">/dashboard</a>
       or by replying to this email.<br><br>
       Groundwork Labs LLC · California, USA · support@groundworklabs.io
     </p>
@@ -54,7 +54,7 @@ const usageAlertTemplate = ({ plan, used, limit, pct }) => `
   <html><body style="font-family: -apple-system, Segoe UI, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px;">
     <h2>Heads up — you're at ${escape(pct)}% of your monthly quota</h2>
     <p>You've used <strong>${escape(used)}</strong> of <strong>${escape(limit)}</strong> requests on your <strong>${escape(plan)}</strong> plan this month.</p>
-    <p>Upgrade to keep building without interruption: <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/pricing">View plans</a></p>
+    <p>Upgrade to keep building without interruption: <a href="${process.env.BASE_URL || 'https://rentvolt.io'}/pricing">View plans</a></p>
   </body></html>
 `;
 
@@ -74,8 +74,8 @@ const demoRequestConfirmationTemplate = ({ company }) => `
     <p>A human at Groundwork Labs will reply within one business day from <a href="mailto:sales@groundworklabs.io">sales@groundworklabs.io</a>${company ? ` regarding <strong>${escape(company)}</strong>` : ''}.</p>
     <p>In the meantime, feel free to:</p>
     <ul>
-      <li>Grab a free API key at <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/pricing">/pricing</a> (100 req/mo, no card)</li>
-      <li>Skim the docs at <a href="${process.env.BASE_URL || 'https://rentvolt-api.onrender.com'}/api-docs">/api-docs</a></li>
+      <li>Grab a free API key at <a href="${process.env.BASE_URL || 'https://rentvolt.io'}/pricing">/pricing</a> (100 req/mo, no card)</li>
+      <li>Skim the docs at <a href="${process.env.BASE_URL || 'https://rentvolt.io'}/api-docs">/api-docs</a></li>
     </ul>
     <p style="font-size: 12px; color: #666;">— The Groundwork Labs team</p>
   </body></html>

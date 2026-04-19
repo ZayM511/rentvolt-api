@@ -61,12 +61,12 @@ All paid plans auto-renew monthly until cancelled. Cancel anytime at `/dashboard
 | POST   | `/api/stripe/webhook`           | Sig. | Stripe event receiver |
 | POST   | `/api/privacy-request`          | —    | CCPA/CPRA request form |
 
-See [`API_USAGE.md`](API_USAGE.md) and the live [`/api-docs`](https://rentvolt-api.onrender.com/api-docs) for full request/response details.
+See [`API_USAGE.md`](API_USAGE.md) and the live [`/api-docs`](https://rentvolt.io/api-docs) for full request/response details.
 
 ## Example
 
 ```bash
-curl -X POST https://rentvolt-api.onrender.com/api/scrape/listings \
+curl -X POST https://rentvolt.io/api/scrape/listings \
   -H "Content-Type: application/json" \
   -H "x-api-key: $RENTVOLT_API_KEY" \
   -d '{"city":"oakland","state":"ca","filters":{"maxPrice":3000,"minBeds":2,"limit":20}}'

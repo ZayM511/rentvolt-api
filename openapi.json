@@ -7,15 +7,15 @@
     "contact": {
       "name": "Groundwork Labs LLC",
       "email": "support@groundworklabs.io",
-      "url": "https://rentvolt-api.onrender.com"
+      "url": "https://rentvolt.io"
     },
     "license": {
       "name": "Proprietary — see Terms of Service",
-      "url": "https://rentvolt-api.onrender.com/legal/tos"
+      "url": "https://rentvolt.io/legal/tos"
     }
   },
   "servers": [
-    { "url": "https://rentvolt-api.onrender.com", "description": "Production" },
+    { "url": "https://rentvolt.io", "description": "Production" },
     { "url": "http://localhost:3000", "description": "Local development" }
   ],
   "tags": [

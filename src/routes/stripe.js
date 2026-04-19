@@ -71,7 +71,7 @@ router.post('/checkout', async (req, res) => {
       // is captured by the submit message below + pricing-page disclosure.
       custom_text: {
         submit: {
-          message: 'By subscribing, you agree to RentVolt\'s Terms of Service (rentvolt-api.onrender.com/legal/tos) and authorize RentVolt to automatically charge your card each month at the listed price until you cancel. Cancel anytime at /dashboard or via support@groundworklabs.io.'
+          message: 'By subscribing, you agree to RentVolt\'s Terms of Service (rentvolt.io/legal/tos) and authorize RentVolt to automatically charge your card each month at the listed price until you cancel. Cancel anytime at /dashboard or via support@groundworklabs.io.'
         }
       },
       metadata: {

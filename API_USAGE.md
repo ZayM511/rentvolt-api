@@ -3,7 +3,7 @@
 ## Base URL
 
 ```
-Production: https://rentvolt-api.onrender.com
+Production: https://rentvolt.io
 Local dev:  http://localhost:3000
 ```
 
@@ -18,7 +18,7 @@ x-api-key: YOUR_API_KEY
 **Getting a key:**
 
 - **Starter (free, 100 req/mo):** `POST /api/keys/free` — no card required.
-- **Paid (Growth/Scale/Enterprise):** start at [`/pricing`](https://rentvolt-api.onrender.com/pricing) → Stripe checkout → key emailed on completion.
+- **Paid (Growth/Scale/Enterprise):** start at [`/pricing`](https://rentvolt.io/pricing) → Stripe checkout → key emailed on completion.
 
 All keys are stored server-side as SHA-256 hashes. We cannot retrieve a lost key — rotate via `/dashboard`.
 
@@ -26,22 +26,22 @@ All keys are stored server-side as SHA-256 hashes. We cannot retrieve a lost key
 
 ```bash
 # 1. Grab a free key
-curl -X POST https://rentvolt-api.onrender.com/api/keys/free
+curl -X POST https://rentvolt.io/api/keys/free
 # → returns { "apiKey": "sk_live_..." }
 
 # 2. Verify
 curl -H "x-api-key: sk_live_..." \
-  https://rentvolt-api.onrender.com/api/verify
+  https://rentvolt.io/api/verify
 
 # 3. Fetch listings
-curl -X POST https://rentvolt-api.onrender.com/api/scrape/listings \
+curl -X POST https://rentvolt.io/api/scrape/listings \
   -H "Content-Type: application/json" \
   -H "x-api-key: sk_live_..." \
   -d '{"city":"oakland","state":"ca","filters":{"maxPrice":3000,"minBeds":2,"limit":10}}'
 
 # 4. Market context
 curl -H "x-api-key: sk_live_..." \
-  https://rentvolt-api.onrender.com/api/market/trends/94612
+  https://rentvolt.io/api/market/trends/94612
 ```
 
 ## Endpoints
@@ -167,7 +167,7 @@ On `429`, respect `Retry-After` (seconds). For `5xx`, retry with exponential bac
 ### Node.js
 
 ```js
-const res = await fetch('https://rentvolt-api.onrender.com/api/scrape/listings', {
+const res = await fetch('https://rentvolt.io/api/scrape/listings', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.RENTVOLT_API_KEY },
   body: JSON.stringify({ city: 'oakland', state: 'ca', filters: { limit: 10 } })
@@ -181,7 +181,7 @@ console.log(listings);
 ```python
 import os, requests
 r = requests.post(
-  'https://rentvolt-api.onrender.com/api/scrape/listings',
+  'https://rentvolt.io/api/scrape/listings',
   headers={'x-api-key': os.environ['RENTVOLT_API_KEY']},
   json={'city': 'oakland', 'state': 'ca', 'filters': {'limit': 10}}
 )
@@ -192,7 +192,7 @@ print(r.json()['listings'])
 
 ```go
 body := strings.NewReader(`{"city":"oakland","state":"ca"}`)
-req, _ := http.NewRequest("POST", "https://rentvolt-api.onrender.com/api/scrape/listings", body)
+req, _ := http.NewRequest("POST", "https://rentvolt.io/api/scrape/listings", body)
 req.Header.Set("Content-Type", "application/json")
 req.Header.Set("x-api-key", os.Getenv("RENTVOLT_API_KEY"))
 resp, _ := http.DefaultClient.Do(req)
@@ -218,8 +218,8 @@ Wire the tool to `GET /api/market/briefing/:zip` and feed `data.briefing` straig
 
 ## Billing, cancellation, and refunds
 
-- Cancel anytime at [`/dashboard`](https://rentvolt-api.onrender.com/dashboard) or Stripe customer portal.
-- 14-day refund on first charge (see [Refund Policy](https://rentvolt-api.onrender.com/legal/refund)).
+- Cancel anytime at [`/dashboard`](https://rentvolt.io/dashboard) or Stripe customer portal.
+- 14-day refund on first charge (see [Refund Policy](https://rentvolt.io/legal/refund)).
 - Pre-charge renewal notice for subscriptions ≥ 1 year per California law.
 
 ---

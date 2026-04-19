@@ -15,7 +15,7 @@ Groundwork Labs LLC ("RentVolt," "we," "us," or "our"), a California limited lia
 
 ## 2. Scope
 
-This Policy applies to personal information collected via the Service (API and website at `rentvolt-api.onrender.com` and any custom domain we operate). It does not apply to third-party services (e.g., Stripe, Render) that have their own privacy policies.
+This Policy applies to personal information collected via the Service (API and website at `rentvolt.io` and any custom domain we operate). It does not apply to third-party services (e.g., Stripe, Render) that have their own privacy policies.
 
 ## 3. Categories of Personal Information Collected (CPRA § 1798.100)
 

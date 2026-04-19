@@ -16,9 +16,9 @@ services:
       - key: PORT
         value: 3000
       - key: BASE_URL
-        value: https://rentvolt-api.onrender.com
+        value: https://rentvolt.io
       - key: CORS_ORIGIN
-        value: https://rentvolt-api.onrender.com
+        value: https://rentvolt.io
       - key: RATE_LIMIT_MAX
         value: "200"
       # Set via Render dashboard (secret):
