@@ -376,7 +376,7 @@ app.get('/demo/listings', async (req, res) => {
       [ip]
     );
 
-    const results = await fetchListings(city, state, { limit: 25 });
+    const results = await fetchListings(city, state, { limit: 50 });
     const sourcesPresent = Object.entries(results.sources || {}).filter(([, v]) => v > 0).map(([k]) => k);
 
     // Augment with HUD + Census context using the first listing's ZIP (if any).
