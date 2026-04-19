@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard — RentVolt</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --bg:#0a0a1a; --fg:#fff; --muted:rgba(255,255,255,0.72); --accent:#00d4ff; --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.12); }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;padding:24px}
+  .wrap{max-width:760px;margin:0 auto}
+  h1{margin:0 0 24px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px}
+  .muted{color:var(--muted)}
+  label{display:block;margin:12px 0 6px;color:var(--muted);font-size:14px}
+  input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--fg);padding:10px 12px;border-radius:8px;font-size:14px}
+  .btn{background:var(--accent);color:#000;padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;margin-right:8px;margin-top:12px}
+  .btn-outline{background:transparent;color:var(--fg);border:1px solid var(--border)}
+  .stat{font-size:32px;font-weight:700;color:var(--accent)}
+  .progress{background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;height:8px;margin:10px 0}
+  .progress > div{height:100%;background:var(--accent)}
+  nav a{color:var(--fg);text-decoration:none;margin-right:16px;font-size:14px}
+  .err{color:#ffb0b0;font-size:13px;margin-top:8px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav style="margin-bottom:24px"><a href="/">← Home</a><a href="/api-docs">Docs</a><a href="/pricing">Pricing</a></nav>
+
+    <h1>Dashboard</h1>
+
+    <div id="signed-out" class="card">
+      <h3 style="margin-top:0">Sign in</h3>
+      <p class="muted">Enter your email to receive a sign-in link. No password needed.</p>
+      <label>Email</label>
+      <input id="email" type="email" placeholder="you@example.com">
+      <button class="btn" id="send-link">Send sign-in link</button>
+      <div id="link-sent" class="muted hidden" style="margin-top:12px">✓ Check your inbox — click the link to sign in.</div>
+      <div id="link-err" class="err hidden"></div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+      <p class="muted" style="font-size:13px">Already have an API key? You can call <code>GET /api/verify</code> with it to check usage without signing in.</p>
+    </div>
+
+    <div id="signed-in" class="hidden">
+      <div class="card">
+        <h3 style="margin-top:0">Usage this month</h3>
+        <div class="stat"><span id="used">—</span> / <span id="limit">—</span></div>
+        <div class="progress"><div id="bar" style="width:0"></div></div>
+        <p class="muted"><span id="plan-label">—</span> plan · resets <span id="reset">—</span></p>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">API key</h3>
+        <p class="muted">Your key: <code id="prefix">—</code>…</p>
+        <p class="muted" style="font-size:13px">For security we never show the full key again. If you lost it, rotate:</p>
+        <button class="btn btn-outline" id="rotate">Rotate API key</button>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">Billing</h3>
+        <button class="btn" id="manage">Manage subscription in Stripe</button>
+        <p class="muted" style="font-size:13px;margin-top:12px">Cancel, upgrade, update payment, and download invoices from Stripe's secure portal.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">Privacy (CCPA / CPRA)</h3>
+        <p class="muted" style="font-size:13px">Exercise your California privacy rights — access, delete, correct, opt out of sale/share, limit sensitive-data use, or appeal a denial. We respond within 45 days.</p>
+        <a class="btn btn-outline" href="/privacy-request">Submit privacy request</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Magic-link dashboard flow: placeholder for now. Full implementation needs /api/auth/request-link + /api/auth/consume-link.
+// Until that's wired, dashboard is email-request only and guides users to verify via /api/verify with their key.
+document.getElementById('send-link').addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  if (!email) return;
+  const err = document.getElementById('link-err');
+  const ok = document.getElementById('link-sent');
+  err.classList.add('hidden'); ok.classList.add('hidden');
+  try {
+    const res = await fetch('/api/auth/request-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    if (res.status === 404) {
+      err.textContent = 'Dashboard sign-in is coming soon. For now, verify your key with: curl -H "x-api-key: KEY" /api/verify';
+      err.classList.remove('hidden');
+      return;
+    }
+    if (res.ok) ok.classList.remove('hidden');
+    else {
+      const j = await res.json().catch(() => ({}));
+      err.textContent = j.error || 'Could not send link';
+      err.classList.remove('hidden');
+    }
+  } catch {
+    err.textContent = 'Network error';
+    err.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>

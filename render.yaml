@@ -3,10 +3,33 @@ services:
     name: rentvolt-api
     env: node
     region: oregon
-    buildCommand: npm install
+    plan: starter
+    buildCommand: npm install && npm run migrate
     startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3000
+      - key: BASE_URL
+        value: https://rentvolt-api.onrender.com
+      - key: CORS_ORIGIN
+        value: https://rentvolt-api.onrender.com
+      - key: RATE_LIMIT_MAX
+        value: "200"
+      # Set via Render dashboard (secret):
+      # - DATABASE_URL           → attach Postgres "rentvolt-db" (Internal URL)
+      # - STRIPE_SECRET_KEY
+      # - STRIPE_WEBHOOK_SECRET
+      # - STRIPE_PRICE_GROWTH
+      # - STRIPE_PRICE_SCALE
+      # - STRIPE_PRICE_ENTERPRISE
+      # - RENTCAST_API_KEY
+      # - RESEND_API_KEY
+      # - EMAIL_FROM            (e.g. "RentVolt <noreply@groundworklabs.io>")
+      # - EMAIL_REPLY_TO        (e.g. "support@groundworklabs.io")
+      # - HUD_API_TOKEN         (optional — https://www.huduser.gov/portal/dataset/fmr-api.html)
+      # - CENSUS_API_KEY        (optional — https://api.census.gov/data/key_signup.html)
+      # - SENTRY_DSN            (optional)

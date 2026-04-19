@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Request — RentVolt</title>
+<style>
+  :root { --bg:#0a0a1a; --fg:#fff; --muted:rgba(255,255,255,0.72); --accent:#00d4ff; --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.12); }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;padding:24px}
+  .wrap{max-width:640px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:32px}
+  h1{margin:0 0 8px}
+  .muted{color:var(--muted);font-size:14px;line-height:1.6}
+  label{display:block;margin:16px 0 6px;color:var(--muted);font-size:14px}
+  input,select,textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--fg);padding:10px 12px;border-radius:8px;font-size:14px;font-family:inherit}
+  textarea{min-height:100px;resize:vertical}
+  .btn{background:var(--accent);color:#000;padding:12px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:20px}
+  a{color:var(--accent)}
+  #ok{display:none;color:#3fe083;margin-top:12px}
+  #err{display:none;color:#ffb0b0;margin-top:12px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav style="margin-bottom:24px"><a href="/" style="color:var(--fg);text-decoration:none;font-size:14px">← Home</a></nav>
+    <div class="card">
+      <h1>California privacy request</h1>
+      <p class="muted">Under the CCPA / CPRA, California residents have the right to know, delete, correct, opt out of sale or share, limit use of sensitive personal information, and appeal a denial. We will respond within 45 days.</p>
+      <form id="form">
+        <label>Email (we use this to verify your identity)</label>
+        <input name="email" type="email" required>
+        <label>Request type</label>
+        <select name="requestType" required>
+          <option value="">— choose —</option>
+          <option value="access">Access: Know what personal information you have about me</option>
+          <option value="delete">Delete: Delete my personal information</option>
+          <option value="correct">Correct: Correct inaccurate personal information</option>
+          <option value="opt_out">Opt out of sale / share of my personal information</option>
+          <option value="limit_sensitive">Limit use of sensitive personal information</option>
+          <option value="appeal">Appeal: Appeal a denial of a prior request</option>
+        </select>
+        <label>Notes (optional)</label>
+        <textarea name="notes" placeholder="E.g. details that help us find your records"></textarea>
+        <button class="btn" type="submit">Submit request</button>
+        <div id="ok">✓ Request received. We'll verify your identity and respond within 45 days at the email you provided.</div>
+        <div id="err"></div>
+      </form>
+      <p class="muted" style="margin-top:24px;font-size:13px">
+        Alternatively, email <a href="mailto:support@groundworklabs.io">support@groundworklabs.io</a>.
+        Full policy at <a href="/legal/privacy">/legal/privacy</a>.
+      </p>
+    </div>
+  </div>
+
+<script>
+document.getElementById('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const data = {
+    email: f.email.value,
+    requestType: f.requestType.value,
+    notes: f.notes.value || undefined
+  };
+  const ok = document.getElementById('ok');
+  const err = document.getElementById('err');
+  ok.style.display = 'none';
+  err.style.display = 'none';
+  try {
+    const res = await fetch('/api/privacy-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const j = await res.json();
+    if (res.ok) { ok.style.display = 'block'; f.reset(); }
+    else { err.textContent = j.error || 'Could not submit'; err.style.display = 'block'; }
+  } catch {
+    err.textContent = 'Network error'; err.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

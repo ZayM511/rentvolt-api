@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { scrapeAll } = require('../scrapers');
+const { fetchListings } = require('../data');
 const { validate, schemas } = require('../middleware/validation');
 
-// Single city lookup
+// ─── POST /api/scrape/listings ─────────────────────────
 router.post('/listings', validate(schemas.scrapeListings), async (req, res) => {
   try {
-    const { city, state, filters = {} } = req.validated || req.body;
-    const { sources, maxPrice, minBeds } = filters;
-    const results = await scrapeAll(city, state, { sources, maxPrice, minBeds });
-
+    const { city, state, filters } = req.validated;
+    const results = await fetchListings(city, state, filters);
     res.json({
       success: true,
       ...results,
@@ -20,76 +18,62 @@ router.post('/listings', validate(schemas.scrapeListings), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Scrape error:', error);
-    res.status(500).json({
+    console.error('[scrape/listings] error:', error.message);
+    res.status(error.status || 500).json({
       success: false,
-      error: 'Scrape failed',
+      error: 'Fetch failed',
       message: process.env.NODE_ENV === 'development' ? error.message : 'Internal error',
       requestId: req.requestId
     });
   }
 });
 
-// Bulk: scrape multiple cities in one request (Pro plan only)
-router.post('/bulk', async (req, res) => {
+// ─── POST /api/scrape/bulk ─────────────────────────────
+// Paid-plans only (Growth / Scale / Enterprise)
+router.post('/bulk', validate(schemas.scrapeBulk), async (req, res) => {
   try {
-    const { locations, filters = {} } = req.body;
-
-    if (!Array.isArray(locations) || locations.length === 0) {
-      return res.status(400).json({ error: 'locations must be a non-empty array of { city, state }' });
-    }
-
-    if (locations.length > 10) {
-      return res.status(400).json({ error: 'Maximum 10 locations per bulk request' });
-    }
-
     if (req.apiKey.plan === 'free') {
-      return res.status(403).json({ error: 'Bulk endpoint requires a paid plan (Growth, Scale, or Enterprise)', upgrade: 'POST /api/stripe/checkout' });
+      return res.status(403).json({
+        error: 'Bulk endpoint requires a paid plan',
+        currentPlan: 'free',
+        upgrade: '/pricing'
+      });
     }
 
-    const results = await Promise.allSettled(
-      locations.map(({ city, state }) => scrapeAll(city, state, filters))
+    const { locations, filters } = req.validated;
+
+    const settled = await Promise.allSettled(
+      locations.map(({ city, state }) => fetchListings(city, state, filters))
     );
 
-    const response = locations.map((loc, i) => ({
-      city: loc.city,
-      state: loc.state,
-      ...(results[i].status === 'fulfilled'
-        ? { success: true, ...results[i].value }
-        : { success: false, error: results[i].reason?.message || 'Unknown error' })
-    }));
+    const results = locations.map((loc, i) => {
+      const r = settled[i];
+      if (r.status === 'fulfilled') return { city: loc.city, state: loc.state, success: true, ...r.value };
+      return { city: loc.city, state: loc.state, success: false, error: r.reason?.message || 'Unknown error' };
+    });
 
     res.json({
       success: true,
-      results: response,
+      results,
       totalLocations: locations.length,
-      meta: { requestId: req.requestId, plan: req.apiKey.plan, remaining: req.apiKey.remaining }
+      meta: {
+        requestId: req.requestId,
+        plan: req.apiKey.plan,
+        remaining: req.apiKey.remaining
+      }
     });
   } catch (error) {
-    console.error('Bulk scrape error:', error);
+    console.error('[scrape/bulk] error:', error.message);
     res.status(500).json({ success: false, error: error.message, requestId: req.requestId });
   }
 });
 
-// Supported locations & sources
+// ─── GET /api/scrape/locations ─────────────────────────
 router.get('/locations', (req, res) => {
   res.json({
-    locations: [
-      { city: 'oakland', state: 'ca', region: 'Bay Area' },
-      { city: 'san-francisco', state: 'ca', region: 'Bay Area' },
-      { city: 'los-angeles', state: 'ca', region: 'Southern California' },
-      { city: 'san-jose', state: 'ca', region: 'Bay Area' },
-      { city: 'seattle', state: 'wa', region: 'Pacific Northwest' },
-      { city: 'portland', state: 'or', region: 'Pacific Northwest' },
-      { city: 'austin', state: 'tx', region: 'Texas' },
-      { city: 'denver', state: 'co', region: 'Mountain West' },
-      { city: 'chicago', state: 'il', region: 'Midwest' },
-      { city: 'new-york', state: 'ny', region: 'Northeast' },
-      { city: 'boston', state: 'ma', region: 'Northeast' },
-      { city: 'miami', state: 'fl', region: 'Southeast' }
-    ],
-    sources: ['rentals', 'zillow', 'apartments', 'rentcafe', 'hotpads', 'zumper'],
-    note: 'Any US city can be queried; listed locations have optimized coverage.'
+    note: 'Any US city/state can be queried. Coverage provided by RentCast (140M+ properties) with HUD + Census context.',
+    sources: ['rentcast', 'hud', 'census'],
+    recommendedStateCodes: ['CA', 'NY', 'TX', 'FL', 'IL', 'WA', 'OR', 'CO', 'MA', 'AZ']
   });
 });
 

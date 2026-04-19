@@ -4,8 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RentVolt — Real Estate Rental Data API</title>
-  <meta name="description" content="Aggregate rental listings from 6 sources in one API call. Real-time data from Apartments.com, Zillow, Rent.com, RentCafe, HotPads, and Zumper.">
+  <meta name="description" content="Rental market intelligence API — live listings, market trends, and HUD/Census context for 140M+ US properties. Built for AI agents, indie builders, and property-tech teams.">
   <meta name="theme-color" content="#0a0a1a">
+  <meta property="og:title" content="RentVolt — Rental market intelligence API">
+  <meta property="og:description" content="Live rental listings, market trends, and HUD/Census context in one API call. 140M+ US properties. Cancel anytime.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rentvolt-api.onrender.com">
+  <meta name="twitter:card" content="summary_large_image">
   <style>
     /* ── Reset & Base ──────────────── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -358,6 +363,12 @@
     }
     .pricing-btn-outline:hover { border-color: rgba(255,255,255,0.4); transform: translateY(-1px); opacity: 1; }
 
+    /* Clear-and-conspicuous auto-renewal disclosure (CA ARL B&PC §17602) */
+    .arl-notice {
+      font-size: 0.72em; color: var(--text-muted); margin: 8px 0 0;
+      text-align: center; line-height: 1.4;
+    }
+
     /* ── CTA ───────────────────────── */
     .cta-section {
       padding: 100px 24px; text-align: center;
@@ -502,18 +513,18 @@
   <section class="hero">
     <div class="hero-content">
       <h1>Real-Time Rental Data<br><span class="accent">From 6 Sources, One API Call</span></h1>
-      <p class="subtitle">Aggregate listings from Apartments.com, Zillow, Rent.com, RentCafe, HotPads, and Zumper. Built for developers, investors, and researchers.</p>
+      <p class="subtitle">Rental listings, market trends, and HUD/Census context for 140M+ US properties — in one API call. Built for AI agents, indie builders, and property-tech teams.</p>
       <div class="hero-buttons">
         <a href="#tryit" class="btn btn-primary">&#9889; Try It Live</a>
         <a href="/api-docs" class="btn btn-ghost">View Docs</a>
       </div>
       <div class="source-pills">
-        <span class="source-pill">Apartments.com</span>
-        <span class="source-pill">Zillow</span>
+        <span class="source-pill">RentCast (140M+ properties)</span>
+        <span class="source-pill">HUD Fair Market Rents</span>
         <span class="source-pill">Rent.com</span>
-        <span class="source-pill">RentCafe</span>
-        <span class="source-pill">HotPads</span>
-        <span class="source-pill">Zumper</span>
+        <span class="source-pill">US Census ACS</span>
+        <span class="source-pill">Public records</span>
+        <span class="source-pill">AVM estimates</span>
       </div>
     </div>
   </section>
@@ -636,7 +647,7 @@
       <div class="feature-card animate-on-scroll">
         <div class="feature-icon">&#9889;</div>
         <h3>6 Sources, 1 Call</h3>
-        <p>Stop scraping sites individually. RentVolt aggregates Apartments.com, Zillow, Rent.com, RentCafe, HotPads, and Zumper in parallel.</p>
+        <p>One licensed API for rental listings, HUD benchmarks, Census demographics, and market trends — with a normalized JSON shape that's a joy to work with.</p>
       </div>
       <div class="feature-card animate-on-scroll">
         <div class="feature-icon">&#128269;</div>
@@ -724,23 +735,25 @@
         <div class="pricing-price">Free</div>
         <ul class="pricing-features">
           <li>100 requests/month</li>
-          <li>All 6 sources</li>
-          <li>Single city queries</li>
+          <li>All data sources</li>
+          <li>Listings + market trends</li>
           <li>Community support</li>
         </ul>
-        <button class="pricing-btn pricing-btn-outline" onclick="generateFreeKey(this)">Get Free API Key</button>
-        <div class="key-result" id="starterKeyResult" style="display:none"></div>
+        <button class="pricing-btn pricing-btn-outline" data-action="free-key">Get Free API Key</button>
+        <p class="arl-notice">No card required. Does not auto-renew.</p>
       </div>
       <div class="pricing-card">
         <h3>Growth</h3>
         <div class="pricing-price">$19<span class="period">/mo</span></div>
         <ul class="pricing-features">
           <li>1,000 requests/month</li>
-          <li>All 6 sources</li>
+          <li>All data sources</li>
           <li>Bulk queries (10 cities)</li>
+          <li>Webhook alerts</li>
           <li>Email support</li>
         </ul>
-        <button class="pricing-btn pricing-btn-outline" onclick="startCheckout('growth', this)">Subscribe</button>
+        <button class="pricing-btn pricing-btn-outline" data-action="checkout" data-plan="growth">Start Growth — $19/mo</button>
+        <p class="arl-notice">Auto-renews monthly at $19 until you cancel.</p>
       </div>
       <div class="pricing-card popular">
         <div class="popular-badge">MOST POPULAR</div>
@@ -748,22 +761,26 @@
         <div class="pricing-price">$49<span class="period">/mo</span></div>
         <ul class="pricing-features">
           <li>5,000 requests/month</li>
-          <li>All 6 sources</li>
+          <li>All data sources</li>
           <li>Bulk queries (10 cities)</li>
+          <li>Saved queries + alerts</li>
           <li>Priority support</li>
         </ul>
-        <button class="pricing-btn pricing-btn-primary" onclick="startCheckout('scale', this)">Subscribe</button>
+        <button class="pricing-btn pricing-btn-primary" data-action="checkout" data-plan="scale">Start Scale — $49/mo</button>
+        <p class="arl-notice">Auto-renews monthly at $49 until you cancel.</p>
       </div>
       <div class="pricing-card">
         <h3>Enterprise</h3>
         <div class="pricing-price">$149<span class="period">/mo</span></div>
         <ul class="pricing-features">
           <li>25,000 requests/month</li>
-          <li>All 6 sources</li>
-          <li>Bulk queries (10 cities)</li>
+          <li>All data sources</li>
+          <li>SLA &amp; uptime guarantee</li>
           <li>Dedicated support</li>
+          <li>Custom contract</li>
         </ul>
-        <button class="pricing-btn pricing-btn-outline" onclick="startCheckout('enterprise', this)">Subscribe</button>
+        <a class="pricing-btn pricing-btn-outline" href="mailto:sales@groundworklabs.io?subject=RentVolt%20Enterprise" style="text-decoration:none;display:block;text-align:center">Contact Sales</a>
+        <p class="arl-notice">Custom terms. Ask about annual billing.</p>
       </div>
     </div>
   </section>
@@ -773,9 +790,9 @@
     <div class="cta-content">
       <h2>Start Building with RentVolt</h2>
       <p>Get your free API key and start querying 6 rental data sources today.</p>
-      <button class="btn btn-primary" onclick="generateFreeKey(this)" style="border:none;cursor:pointer">&#9889; Get Free API Key</button>
+      <button class="btn btn-primary" data-action="free-key" style="border:none;cursor:pointer">&#9889; Get Free API Key</button>
       <div class="key-result" id="ctaKeyResult" style="display:none"></div>
-      <span class="cta-small">No credit card required &middot; 100 free requests per month</span>
+      <span class="cta-small">No credit card required &middot; 100 free requests per month &middot; Does not auto-renew</span>
     </div>
   </section>
 
@@ -790,17 +807,22 @@
         <h4>Product</h4>
         <ul>
           <li><a href="#features">Features</a></li>
-          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="/pricing">Pricing</a></li>
           <li><a href="/api-docs">API Docs</a></li>
+          <li><a href="/dashboard">Dashboard</a></li>
           <li><a href="https://stats.uptimerobot.com/" target="_blank" rel="noopener">Status</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Company</h4>
+        <h4>Legal</h4>
         <ul>
-          <li><a href="https://github.com/ZayM511/rentvolt-api/blob/main/legal/TermsOfService.md" target="_blank" rel="noopener">Terms of Service</a></li>
-          <li><a href="https://github.com/ZayM511/rentvolt-api/blob/main/legal/PrivacyPolicy.md" target="_blank" rel="noopener">Privacy Policy</a></li>
-          <li><a href="https://github.com/ZayM511/rentvolt-api/blob/main/legal/LegalDisclaimer.md" target="_blank" rel="noopener">Legal Disclaimer</a></li>
+          <li><a href="/legal/tos">Terms of Service</a></li>
+          <li><a href="/legal/privacy">Privacy Policy</a></li>
+          <li><a href="/legal/aup">Acceptable Use</a></li>
+          <li><a href="/legal/refund">Refund Policy</a></li>
+          <li><a href="/legal/dmca">DMCA</a></li>
+          <li><a href="/legal/disclaimer">Disclaimer</a></li>
+          <li><a href="/legal/do-not-sell"><strong>Do Not Sell or Share</strong></a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -989,78 +1011,6 @@
     });
   </script>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-  <script>
-    function showToast(msg) {
-      const existing = document.querySelector('.toast-msg');
-      if (existing) existing.remove();
-      const toast = document.createElement('div');
-      toast.className = 'toast-msg';
-      toast.textContent = msg;
-      document.body.appendChild(toast);
-      requestAnimationFrame(() => toast.classList.add('visible'));
-      setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 300); }, 4000);
-    }
-    async function generateFreeKey(btn) {
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Generating...';
-      try {
-        const res = await fetch('/api/keys/free', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const data = await res.json();
-        if (data.success && data.apiKey) {
-          btn.textContent = 'Key Generated!';
-          btn.style.opacity = '0.6';
-          const container = btn.closest('.pricing-card') || btn.parentElement;
-          const resultDiv = container.querySelector('.key-result');
-          if (resultDiv) {
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML =
-              '<div class="key-label">Your API Key</div>' +
-              '<div class="key-value" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{showToast(\'API key copied!\')})" title="Click to copy">' + data.apiKey + '</div>' +
-              '<div class="key-hint">Click the key to copy. Save it now — it won\'t be shown again.</div>' +
-              '<div class="key-actions">' +
-                '<button class="key-copy-btn" onclick="navigator.clipboard.writeText(\'' + data.apiKey + '\').then(()=>{showToast(\'Copied!\')})">Copy Key</button>' +
-                '<a href="/api-docs" class="key-docs-link">View Docs</a>' +
-              '</div>';
-          }
-        } else {
-          showToast(data.error || 'Could not generate key. Try again later.');
-          btn.disabled = false;
-          btn.textContent = originalText;
-        }
-      } catch (err) {
-        showToast('Something went wrong. Please try again.');
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-    }
-    async function startCheckout(plan, btn) {
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Redirecting...';
-      try {
-        const res = await fetch('/api/stripe/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan })
-        });
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          showToast('Checkout unavailable right now. Please try again later.');
-          btn.disabled = false;
-          btn.textContent = originalText;
-        }
-      } catch (err) {
-        showToast('Something went wrong. Please try again.');
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-    }
-  </script>
+  <script src="/app.js"></script>
 </body>
 </html>

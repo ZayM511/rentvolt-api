@@ -1,90 +1,47 @@
 # Legal Disclaimer
 
-**Effective Date:** April 7, 2026
+**Version:** 2026.04.17
+**Effective Date:** April 17, 2026
 
-## 1. General Disclaimer
+## 1. Informational Purpose Only
 
-The Real Estate Scraper API ("the Service") is provided by Groundwork Labs LLC ("we," "us," or "our") subject to the terms and conditions set forth herein. By using this Service, you acknowledge that you have read, understood, and agree to be bound by this Legal Disclaimer.
+The RentVolt API and related services (the "Service") provide information about rental-market activity for research, software development, and internal business use. **The Service does not provide legal, financial, investment, tax, or appraisal advice.** You should consult qualified professionals before making decisions based on data from the Service.
 
-## 2. No Legal Advice
+## 2. Data Sources and Accuracy
 
-The information provided through this Service is for informational and research purposes only. **We do not provide legal advice.** Nothing on this Service should be construed as legal advice.
+Data returned by the Service is aggregated from multiple third parties, including:
 
-## 3. Data Accuracy & Disclaimer
+- **RentCast.io** — a licensed rental-data API covering properties across the United States
+- **US Department of Housing and Urban Development (HUD)** — Fair Market Rent public data
+- **US Census Bureau** — American Community Survey (ACS) public data
 
-### No Warranty
-**We make no representations or warranties of any kind**, express or implied, regarding:
-- The accuracy, completeness, or reliability of any data
-- The availability of any listings
-- The timeliness of data updates
+We do not own, control, or endorse these third-party sources. We do not guarantee the accuracy, completeness, availability, timeliness, or continued existence of any data. Rental markets change rapidly; data may be delayed or out of date.
 
-Data is aggregated from third-party sources and we cannot guarantee its accuracy or current status.
+## 3. Fair Housing
 
-## 4. Third-Party Data Sources
+**The Service is not a vehicle for discrimination.** Users must not filter, rank, exclude, target, or advertise listings in any way that violates the federal Fair Housing Act (42 U.S.C. §§ 3601–3619), California Fair Employment and Housing Act (Cal. Gov't Code § 12900 et seq.), or any other law prohibiting discrimination in housing. See the [Acceptable Use Policy](/legal/aup) for specifics.
 
-This Service aggregates data from various third-party websites, including but not limited to:
-- rentals.com
-- zillow.com  
-- apartments.com
-- rentcafe.com
-- hotpads.com
-- zumper.com
+## 4. No Affiliation with Data Sources
 
-We do not own, control, or endorse any of these third-party sources.
+RentVolt is an independent service operated by Groundwork Labs LLC. We are not affiliated with, endorsed by, or sponsored by RentCast, HUD, the US Census Bureau, Zillow, Apartments.com, Realtor.com, or any similar organization.
 
 ## 5. User Compliance Obligations
 
-### Legal Compliance
-Users of this Service are solely responsible for:
-- Ensuring their use complies with applicable federal, state, and local laws
-- Obtaining any required consents for data use
-- Complying with each data source's terms of service
-- Not using data for any illegal purpose
+You are solely responsible for:
 
-### California-Specific Compliance
-Users conducting business in California agree to comply with:
-- California Consumer Privacy Act (CCPA)
-- California Privacy Rights Act (CPRA)
-- California Unfair Competition Law (Business & Professions Code § 17200)
-- California false advertising laws
+- Ensuring your use of the Service and the Data complies with all applicable federal, state, and local laws, regulations, and ordinances.
+- Obtaining any consents or licenses required by law for your use of the Data.
+- Not using the Service or Data for any unlawful, discriminatory, deceptive, or harmful purpose.
 
-## 6. Fair Use & Data Usage
+## 6. Limitation of Liability
 
-### Acceptable Use
-- Use data only for lawful purposes
-- Respect the terms of service of data sources
-- Do not republish substantial portions of data
-- Provide attribution where required by data source terms
+Please see Sections 9 and 10 of the [Terms of Service](/legal/tos) for the full "as is" disclaimer and limitation-of-liability provisions.
 
-### Prohibited Use
-- Do not use data to compete directly with data sources
-- Do not use data for spam, harassment, or unlawful purposes
-- Do not circumvent technical or legal restrictions
+## 7. Contact
 
-## 7. Limitation of Liability
-
-**Groundwork Labs LLC shall not be liable for:**
-- Any inaccuracies in scraped or aggregated data
-- Any damages resulting from reliance on data
-- Any decisions made based on provided data
-- Any violations of third-party terms of service by users
-
-## 8. Indemnification
-
-By using this Service, you agree to indemnify and hold harmless Groundwork Labs LLC, its members, employees, and agents from any claims, damages, or expenses arising from:
-- Your violation of this disclaimer
-- Your violation of any applicable laws
-- Your violation of any third-party rights
-
-## 9. Changes to Disclaimer
-
-We reserve the right to modify this disclaimer at any time. Continued use of the Service constitutes acceptance of this disclaimer as modified.
-
-## 10. Contact
-
-**Groundwork Labs LLC**  
-California Limited Liability Company  
-Email: legal@groundworklabs.com
+**Groundwork Labs LLC**, a California Limited Liability Company
+2108 N St Ste N, Sacramento, CA 95816, USA
+`legal@groundworklabs.io`
 
 ---
-*This disclaimer is for informational purposes only.*
+*This disclaimer is for informational purposes only and does not constitute legal advice.*

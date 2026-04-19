@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subscription confirmed — RentVolt</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --bg:#0a0a1a; --fg:#fff; --muted:rgba(255,255,255,0.72); --accent:#00d4ff; --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.12); }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{max-width:620px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px;box-shadow:0 8px 48px rgba(0,0,0,.4)}
+  h1{margin:0 0 8px;font-size:28px}
+  .check{font-size:42px;margin-bottom:8px}
+  .muted{color:var(--muted)}
+  .box{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.3);padding:16px;border-radius:10px;margin:20px 0;font-family:ui-monospace,SFMono-Regular,monospace;font-size:13px;word-break:break-all}
+  .pill{display:inline-block;background:rgba(0,212,255,.16);color:var(--accent);padding:4px 10px;border-radius:999px;font-size:13px;margin-right:6px}
+  .btn{display:inline-block;background:var(--accent);color:#000;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:8px}
+  .btn-outline{background:transparent;color:var(--fg);border:1px solid var(--border)}
+  hr{border:none;border-top:1px solid var(--border);margin:24px 0}
+  a{color:var(--accent)}
+  code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">⚡</div>
+    <h1>Welcome to RentVolt</h1>
+    <p class="muted">Your subscription is confirmed. Your API key has been emailed to you for safekeeping.</p>
+
+    <div id="loading" class="muted">Retrieving your key details…</div>
+
+    <div id="details" style="display:none">
+      <div style="margin:16px 0 8px">
+        <span class="pill" id="plan">—</span>
+        <span class="pill" id="quota">—</span>
+      </div>
+      <p class="muted" style="margin:8px 0 4px">Key prefix (full key sent via email):</p>
+      <div class="box" id="prefix">—</div>
+      <p class="muted" style="font-size:13px">Check your inbox at <strong id="email">your email</strong> (and spam folder) for the full key. For security, we only display the prefix on this page.</p>
+    </div>
+
+    <hr>
+
+    <h3>Next steps</h3>
+    <ol class="muted" style="line-height:1.8">
+      <li>Copy your full key from the welcome email</li>
+      <li>Set it in your env: <code>RENTVOLT_API_KEY=…</code></li>
+      <li>Make your first request:
+        <pre style="background:rgba(255,255,255,.04);padding:12px;border-radius:8px;overflow-x:auto;font-size:12px"><code>curl -H "x-api-key: $RENTVOLT_API_KEY" \
+  https://rentvolt-api.onrender.com/api/verify</code></pre>
+      </li>
+    </ol>
+
+    <a href="/api-docs" class="btn">📘 View API Docs</a>
+    <a href="/dashboard" class="btn btn-outline">🎛️ Open Dashboard</a>
+
+    <hr>
+    <p class="muted" style="font-size:12px">
+      Your subscription auto-renews monthly at the listed price until you cancel.
+      Cancel anytime at <a href="/dashboard">/dashboard</a> or by emailing
+      <a href="mailto:support@groundworklabs.io">support@groundworklabs.io</a>.
+      14-day refund available on your first charge.
+    </p>
+  </div>
+
+<script>
+(async function() {
+  const params = new URLSearchParams(location.search);
+  const sid = params.get('session_id');
+  const $ = (id) => document.getElementById(id);
+  if (!sid) {
+    $('loading').textContent = 'Missing session ID — please check your email for the welcome message.';
+    return;
+  }
+  try {
+    let tries = 0;
+    const fetchDetails = async () => {
+      const res = await fetch('/api/stripe/session/' + encodeURIComponent(sid));
+      if (res.status === 202 && tries < 6) {
+        tries++;
+        setTimeout(fetchDetails, 1500);
+        return;
+      }
+      if (!res.ok) throw new Error('Could not fetch session');
+      const data = await res.json();
+      $('loading').style.display = 'none';
+      $('details').style.display = 'block';
+      $('plan').textContent = (data.plan || '').toUpperCase();
+      $('quota').textContent = (data.monthlyRequests || 0).toLocaleString() + ' req/mo';
+      $('prefix').textContent = (data.apiKeyPrefix || '—') + '…';
+      if (data.email) $('email').textContent = data.email;
+    };
+    fetchDetails();
+  } catch (err) {
+    $('loading').textContent = 'Your key is ready — please check your email.';
+  }
+})();
+</script>
+</body>
+</html>
