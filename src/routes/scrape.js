@@ -7,7 +7,7 @@ const { validate, schemas } = require('../middleware/validation');
 router.post('/listings', validate(schemas.scrapeListings), async (req, res) => {
   try {
     const { city, state, filters } = req.validated;
-    const results = await fetchListings(city, state, filters);
+    const results = await fetchListings(city, state, { ...filters, plan: req.apiKey?.plan });
     res.json({
       success: true,
       ...results,
@@ -43,7 +43,7 @@ router.post('/bulk', validate(schemas.scrapeBulk), async (req, res) => {
     const { locations, filters } = req.validated;
 
     const settled = await Promise.allSettled(
-      locations.map(({ city, state }) => fetchListings(city, state, filters))
+      locations.map(({ city, state }) => fetchListings(city, state, { ...filters, plan: req.apiKey?.plan }))
     );
 
     const results = locations.map((loc, i) => {

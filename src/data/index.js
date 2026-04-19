@@ -3,7 +3,17 @@ const { summarizeFmr, fetchFmrByZip } = require('./hud');
 const { fetchAcsByZip } = require('./census');
 const { query } = require('../db');
 
-const CACHE_TTL_SECONDS = 6 * 60 * 60; // 6h
+// Per-plan cache TTL (seconds). Longer TTL = fewer RentCast calls = better
+// unit economics. Free-tier users don't need real-time data; enterprise
+// customers usually do.
+const CACHE_TTL_BY_PLAN = {
+  free:       24 * 60 * 60, // 24h
+  growth:     12 * 60 * 60, // 12h
+  scale:       6 * 60 * 60, // 6h
+  enterprise:  3 * 60 * 60  // 3h
+};
+const DEFAULT_CACHE_TTL = 12 * 60 * 60;
+const ttlFor = (plan) => CACHE_TTL_BY_PLAN[plan] || DEFAULT_CACHE_TTL;
 
 const cacheKey = (city, state, filters) => {
   const norm = {
@@ -29,13 +39,13 @@ const getCached = async (key) => {
   }
 };
 
-const setCached = async (key, payload) => {
+const setCached = async (key, payload, ttlSeconds) => {
   try {
     await query(
       `INSERT INTO listings_cache (cache_key, payload, expires_at)
        VALUES ($1, $2, now() + ($3 || ' seconds')::interval)
        ON CONFLICT (cache_key) DO UPDATE SET payload = EXCLUDED.payload, expires_at = EXCLUDED.expires_at`,
-      [key, payload, String(CACHE_TTL_SECONDS)]
+      [key, payload, String(ttlSeconds)]
     );
   } catch (err) {
     console.warn('[data] cache write failed:', err.message);
@@ -81,16 +91,34 @@ const dedupe = (listings) => {
 
 const fetchListings = async (city, state, options = {}) => {
   const key = cacheKey(city, state, options);
+  const plan = options.plan || null;
   const cached = await getCached(key);
-  if (cached) return { ...cached, cached: true };
+  if (cached) {
+    // Fire-and-forget upstream-call log for cache-hit accounting
+    try {
+      const { logUpstreamCall } = require('./cost-tracker');
+      logUpstreamCall({ source: 'rentcast', endpoint: 'listings/rental/long-term', plan, cacheHit: true, costCents: 0 });
+    } catch {}
+    return { ...cached, cached: true };
+  }
 
   let listings = [];
   const sources = { rentcast: 0 };
   const errors = {};
+  const upstreamStart = Date.now();
 
   try {
     listings = await fetchRentalListings(city, state, options);
     sources.rentcast = listings.length;
+    try {
+      const { logUpstreamCall } = require('./cost-tracker');
+      logUpstreamCall({
+        source: 'rentcast',
+        endpoint: 'listings/rental/long-term',
+        plan, cacheHit: false,
+        durationMs: Date.now() - upstreamStart
+      });
+    } catch {}
   } catch (err) {
     console.error('[data] rentcast fetch failed:', err.message);
     errors.rentcast = err.message;
@@ -110,7 +138,7 @@ const fetchListings = async (city, state, options = {}) => {
     fetchedAt: new Date().toISOString()
   };
 
-  if (limited.length > 0) await setCached(key, payload);
+  if (limited.length > 0) await setCached(key, payload, ttlFor(plan));
   return payload;
 };
 

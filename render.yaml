@@ -35,5 +35,7 @@ services:
       # - HUD_API_TOKEN         (optional — https://www.huduser.gov/portal/dataset/fmr-api.html)
       # - CENSUS_API_KEY        (optional — https://api.census.gov/data/key_signup.html)
       # - SESSION_SECRET        (required — generate with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`)
+      # - ADMIN_TOKEN           (required for /api/admin/costs — generate same way as SESSION_SECRET)
+      # - RENTCAST_COST_CENTS_PER_CALL (optional — default 5; tune to your RentCast plan)
       # - GEMINI_API_KEY        (optional — used only by scripts/generate-og.js, not at runtime)
       # - SENTRY_DSN            (optional)

@@ -266,6 +266,32 @@ app.get('/health', async (req, res) => {
   });
 });
 
+// ─── Admin: upstream-call cost summary ──────────────────
+// Usage:
+//   curl -H "x-admin-token: $ADMIN_TOKEN" /api/admin/costs
+//   curl -H "x-admin-token: $ADMIN_TOKEN" "/api/admin/costs?month=2026-04"
+// ADMIN_TOKEN is set in Render env; endpoint is 401 without it.
+app.get('/api/admin/costs', async (req, res) => {
+  const adminToken = process.env.ADMIN_TOKEN;
+  if (!adminToken) return res.status(503).json({ error: 'ADMIN_TOKEN not configured on server' });
+  if (req.headers['x-admin-token'] !== adminToken) {
+    return res.status(401).json({ error: 'Invalid admin token' });
+  }
+  try {
+    const { monthlySummary, COST_CENTS } = require('./data/cost-tracker');
+    const month = typeof req.query.month === 'string' ? req.query.month : undefined;
+    const summary = await monthlySummary(month);
+    res.json({
+      ...summary,
+      costPerCallCents: COST_CENTS,
+      note: 'cost_cents reflects configured RENTCAST_COST_CENTS_PER_CALL; reconcile against real RentCast invoice monthly.'
+    });
+  } catch (err) {
+    console.error('[admin/costs] error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Upstream data-source health ─────────────────────────
 // Surfaces silent outages on RentCast / HUD / Census. No API key required.
 app.get('/api/health/sources', async (req, res) => {
@@ -376,7 +402,7 @@ app.get('/demo/listings', async (req, res) => {
       [ip]
     );
 
-    const results = await fetchListings(city, state, { limit: 50 });
+    const results = await fetchListings(city, state, { limit: 50, plan: 'free' });
     const sourcesPresent = Object.entries(results.sources || {}).filter(([, v]) => v > 0).map(([k]) => k);
 
     // Augment with HUD + Census context using the first listing's ZIP (if any).
@@ -675,6 +701,12 @@ if (require.main === module) {
 ╚═══════════════════════════════════════════════╝
   `);
     await ensureSchema();
+    // Start the warm-cache background job (delays 45s internally, then runs every 6h)
+    try {
+      require('./jobs/warm-cache').start();
+    } catch (err) {
+      console.warn('[boot] warm-cache start failed:', err.message);
+    }
   });
 
   const shutdown = (signal) => {
