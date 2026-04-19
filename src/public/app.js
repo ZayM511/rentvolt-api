@@ -3,12 +3,14 @@
 
 (function () {
   // ─── Toast ──────────────────────────────────────────
-  function showToast(msg) {
+  function showToast(msg, tone) {
     const existing = document.querySelector('.toast-msg');
     if (existing) existing.remove();
     const t = document.createElement('div');
-    t.className = 'toast-msg';
+    t.className = 'toast-msg' + (tone ? ' toast-' + tone : '');
     t.textContent = msg;
+    t.setAttribute('role', 'alert');
+    t.setAttribute('aria-live', tone === 'error' ? 'assertive' : 'polite');
     document.body.appendChild(t);
     requestAnimationFrame(() => t.classList.add('visible'));
     setTimeout(() => { t.classList.remove('visible'); setTimeout(() => t.remove(), 300); }, 4000);
@@ -47,19 +49,24 @@
 
   async function generateFreeKey(btn) {
     const original = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Creating your key…'; }
+    showToast('Creating your key…');
+    // Second toast if the cold-start is slow — reassures rather than hangs silent.
+    const slowTimer = setTimeout(() => showToast('Our cold-start warmed up — key almost ready.'), 2500);
     try {
       const res = await fetch('/api/keys/free', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
       });
+      clearTimeout(slowTimer);
       const data = await res.json();
       if (!res.ok || !data.success || !data.apiKey) {
-        showToast(data.error || 'Could not generate key. Try again later.');
+        showToast(data.error || data.message || 'Could not generate key. Try again later.', 'error');
         if (btn) { btn.disabled = false; btn.textContent = original; }
         return;
       }
+      showToast('✓ Key ready. Copy it now — it won\'t be shown again.');
       if (btn) { btn.textContent = '✓ Key Generated'; btn.style.opacity = '0.65'; }
       const container = btn && (btn.closest('.pricing-card') || btn.parentElement);
       const resultDiv = container && container.querySelector('.key-result');
@@ -83,7 +90,8 @@
         window.prompt('Your RentVolt API key (save it now — it will not be shown again):', data.apiKey);
       }
     } catch (err) {
-      showToast('Network error. Please try again.');
+      clearTimeout(slowTimer);
+      showToast('Network error. Please try again.', 'error');
       if (btn) { btn.disabled = false; btn.textContent = original; }
     }
   }

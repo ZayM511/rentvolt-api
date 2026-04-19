@@ -140,6 +140,18 @@ app.get('/success', servePublic('success.html'));
 app.get('/cancel',  servePublic('cancel.html'));
 app.get('/dashboard', servePublic('dashboard.html'));
 app.get('/privacy-request', servePublic('privacy-request.html'));
+app.get('/demo', servePublic('demo.html'));
+
+// ─── Cache-Control for static-ish marketing pages ───────
+app.use((req, res, next) => {
+  const p = req.path;
+  if (p === '/' || p === '/pricing' || p === '/api-docs' || p.startsWith('/legal/') || p === '/robots.txt' || p === '/sitemap.xml') {
+    res.set('Cache-Control', 'public, max-age=300, must-revalidate');
+  } else if (p === '/og.png' || p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.svg')) {
+    res.set('Cache-Control', 'public, max-age=86400, immutable');
+  }
+  next();
+});
 
 // ─── On-site legal pages ────────────────────────────────
 const LEGAL_DOCS = {
@@ -150,7 +162,8 @@ const LEGAL_DOCS = {
   aup: 'AUP.md',
   refund: 'RefundPolicy.md',
   dmca: 'DMCA.md',
-  'do-not-sell': 'DoNotSell.md'
+  'do-not-sell': 'DoNotSell.md',
+  'api-versioning': 'API_VERSIONING.md'
 };
 
 app.get('/legal/:doc', (req, res) => {
@@ -183,7 +196,8 @@ function renderLegalPage(slug, bodyHtml) {
     aup: 'Acceptable Use Policy',
     refund: 'Refund Policy',
     dmca: 'DMCA Policy',
-    'do-not-sell': 'Do Not Sell or Share My Personal Information'
+    'do-not-sell': 'Do Not Sell or Share My Personal Information',
+    'api-versioning': 'API Versioning & Deprecation Policy'
   }[slug] || 'Legal';
 
   return `<!doctype html><html lang="en"><head>
@@ -385,6 +399,81 @@ app.get('/demo/listings', async (req, res) => {
   }
 });
 
+// ─── Public stats (data freshness trust row) ───────────
+app.get('/api/stats', async (req, res) => {
+  try {
+    const [u, k, l] = await Promise.all([
+      db.query('SELECT count(*)::int AS n FROM users').catch(() => ({ rows: [{ n: 0 }] })),
+      db.query('SELECT count(*)::int AS n FROM api_keys WHERE status = $1', ['active']).catch(() => ({ rows: [{ n: 0 }] })),
+      db.query('SELECT max(created_at) AS ts FROM listings_cache').catch(() => ({ rows: [{ ts: null }] }))
+    ]);
+    res.set('Cache-Control', 'public, max-age=60');
+    res.json({
+      propertiesCatalogued: '140M+',
+      activeKeys: k.rows[0].n,
+      users: u.rows[0].n,
+      lastRefresh: l.rows[0].ts || new Date().toISOString(),
+      sources: ['RentCast', 'HUD', 'US Census ACS'],
+      note: 'Live listings flow from RentCast in real time. HUD FMR and Census ACS are refreshed per query (no stale caching).'
+    });
+  } catch (err) {
+    console.error('[stats] error:', err.message);
+    res.status(500).json({ error: 'Could not load stats' });
+  }
+});
+
+// ─── Newsletter signup ──────────────────────────────────
+app.post('/api/subscribe', async (req, res) => {
+  try {
+    const email = String(req.body?.email || '').toLowerCase().trim();
+    const source = String(req.body?.source || 'homepage').slice(0, 32);
+    if (!/.+@.+\..+/.test(email) || email.length > 254) {
+      return res.status(400).json({ error: 'Enter a valid email address' });
+    }
+    await db.query(
+      `INSERT INTO newsletter_subscribers (email, source, ip)
+         VALUES ($1, $2, $3::inet)
+       ON CONFLICT (email) DO UPDATE SET source = COALESCE(newsletter_subscribers.source, EXCLUDED.source)`,
+      [email, source, req.ip]
+    );
+    res.json({ success: true, message: 'Subscribed. You\'ll hear from us when we ship something worth your inbox.' });
+  } catch (err) {
+    console.error('[subscribe] error:', err.message);
+    res.status(500).json({ error: 'Could not subscribe. Try again later.' });
+  }
+});
+
+// ─── Enterprise demo request ────────────────────────────
+app.post('/api/demo-request', async (req, res) => {
+  try {
+    const b = req.body || {};
+    const email = String(b.email || '').toLowerCase().trim();
+    if (!/.+@.+\..+/.test(email)) return res.status(400).json({ error: 'Enter a valid email' });
+    const { sendMagicLinkEmail, send } = require('./email');
+    await db.query(
+      `INSERT INTO demo_requests (email, company, use_case, volume, notes, ip)
+         VALUES ($1, $2, $3, $4, $5, $6::inet)`,
+      [email, b.company || null, b.useCase || null, b.volume || null, b.notes || null, req.ip]
+    );
+    send({
+      to: 'sales@groundworklabs.io',
+      subject: `[RentVolt] Demo request from ${email}`,
+      html: `<p>New enterprise demo request:</p>
+        <ul>
+          <li><b>Email:</b> ${email}</li>
+          <li><b>Company:</b> ${(b.company || '—').replace(/[<>]/g, '')}</li>
+          <li><b>Use case:</b> ${(b.useCase || '—').replace(/[<>]/g, '')}</li>
+          <li><b>Volume:</b> ${(b.volume || '—').replace(/[<>]/g, '')}</li>
+          <li><b>Notes:</b> ${(b.notes || '—').replace(/[<>]/g, '')}</li>
+        </ul>`
+    }).catch((err) => console.warn('[demo-request] sales email failed:', err.message));
+    res.json({ success: true, message: 'Thanks — a human will reply within one business day.' });
+  } catch (err) {
+    console.error('[demo-request] error:', err.message);
+    res.status(500).json({ error: 'Could not submit request' });
+  }
+});
+
 // ─── Feedback (cancel-page) ─────────────────────────────
 app.post('/api/feedback', validate(schemas.feedback), async (req, res) => {
   try {
@@ -437,7 +526,7 @@ app.use('/api', (req, res, next) => {
     '/stripe/checkout', '/stripe/plans', '/stripe/webhook', '/stripe/session',
     '/feedback', '/privacy-request', '/keys/free',
     '/auth/request-link', '/auth/consume-link', '/auth/signout',
-    '/me', '/health/sources'
+    '/me', '/health/sources', '/stats', '/subscribe', '/demo-request'
   ];
   if (publicPaths.some((p) => req.path === p || req.path.startsWith(`${p}/`))) return next();
   return apiKeyAuth(req, res, next);

@@ -554,7 +554,7 @@
   <!-- ── Navigation ── -->
   <nav class="nav" id="nav">
     <div class="nav-logo"><span>&#9889;</span> RentVolt</div>
-    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+    <button class="nav-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
       <span></span><span></span><span></span>
     </button>
     <ul class="nav-links" id="navLinks">
@@ -562,6 +562,7 @@
       <li><a href="#tryit">Try It</a></li>
       <li><a href="#pricing">Pricing</a></li>
       <li><a href="/api-docs">Docs</a></li>
+      <li><a href="/demo">Book a demo</a></li>
       <li><a href="#pricing" class="nav-cta">Get API Key</a></li>
     </ul>
   </nav>
@@ -583,6 +584,7 @@
         <span class="source-pill">🏘 Fair-Housing aligned</span>
         <span class="source-pill">🔒 PCI via Stripe</span>
       </div>
+      <p style="margin-top:20px;font-size:0.78em;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;">Early access · launched April 2026</p>
     </div>
   </section>
 
@@ -793,6 +795,30 @@
     </div>
   </section>
 
+  <!-- ── AI agents section ── -->
+  <section class="section" id="ai-agents" aria-label="AI agent support" style="padding-top:60px;padding-bottom:60px">
+    <div class="section-label">Built for AI agents</div>
+    <h2 class="section-title">Rental data your agent can actually use.</h2>
+    <p class="section-subtitle">LLM-native response shapes, function-calling schemas, and an MCP server for Claude and Cursor. Turn "what's 2-bedroom rent in Oakland?" into a sourced answer in one call.</p>
+    <div style="max-width:1000px;margin:40px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+      <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:28px">
+        <div style="font-size:0.8em;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-weight:600">Function calling</div>
+        <h3 style="font-size:1.1em;margin:0 0 10px">JSON Schema included</h3>
+        <p style="color:var(--text-secondary);font-size:0.95em;margin:0">Every endpoint ships with a ready-to-paste <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.85em">tools[]</code> definition for Claude, OpenAI, and Gemini agents.</p>
+      </div>
+      <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:28px">
+        <div style="font-size:0.8em;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-weight:600">MCP server</div>
+        <h3 style="font-size:1.1em;margin:0 0 10px">Drop-in for Claude Desktop &amp; Cursor</h3>
+        <p style="color:var(--text-secondary);font-size:0.95em;margin:0">Expose the API as an MCP tool your assistant can call directly — no orchestration code.</p>
+      </div>
+      <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:28px">
+        <div style="font-size:0.8em;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-weight:600">Briefing endpoint</div>
+        <h3 style="font-size:1.1em;margin:0 0 10px">One-paragraph market summary</h3>
+        <p style="color:var(--text-secondary);font-size:0.95em;margin:0"><code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.85em">GET /api/market/briefing/:zip</code> returns a single sourced sentence per market — perfect context for an LLM prompt.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Pricing ── -->
   <section class="pricing-section" id="pricing">
     <div class="section-label" style="max-width:1100px;margin:0 auto;">Pricing</div>
@@ -865,6 +891,20 @@
     </div>
   </section>
 
+  <!-- ── Newsletter signup ── -->
+  <section class="section" aria-label="Newsletter" style="padding:60px 24px">
+    <div style="max-width:520px;margin:0 auto;text-align:center">
+      <h3 style="font-size:1.3em;margin:0 0 8px">Changelog in your inbox</h3>
+      <p style="color:var(--text-secondary);margin:0 0 20px;font-size:0.95em">New endpoints, price changes, deprecations. Low volume. Unsubscribe anytime.</p>
+      <form id="newsletter-form" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+        <input type="email" id="newsletter-email" placeholder="you@example.com" required aria-label="Email address"
+               style="flex:1 1 260px;min-width:200px;padding:12px 14px;border-radius:8px;background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text-primary);font-size:14px">
+        <button type="submit" class="btn btn-primary" id="newsletter-btn" style="padding:12px 22px;font-size:0.95em">Subscribe</button>
+      </form>
+      <p id="newsletter-msg" role="alert" aria-live="polite" style="margin-top:12px;font-size:13px;min-height:18px"></p>
+    </div>
+  </section>
+
   <!-- ── Footer ── -->
   <footer>
     <div class="footer-grid">
@@ -879,6 +919,8 @@
           <li><a href="/pricing">Pricing</a></li>
           <li><a href="/api-docs">API Docs</a></li>
           <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/demo">Book a demo</a></li>
+          <li><a href="/legal/api-versioning">API versioning policy</a></li>
           <li><a href="https://stats.uptimerobot.com/" target="_blank" rel="noopener">Status</a></li>
         </ul>
       </div>
@@ -914,15 +956,62 @@
       nav.classList.toggle('scrolled', window.scrollY > 50);
     });
 
-    // ── Mobile Hamburger ──
+    // ── Mobile Hamburger (ARIA-aware) ──
     const hamburger = document.getElementById('hamburger');
     const navLinks = document.getElementById('navLinks');
     hamburger.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
+      const isOpen = navLinks.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', String(isOpen));
+      hamburger.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
     });
     navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => navLinks.classList.remove('open'));
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        hamburger.setAttribute('aria-label', 'Open menu');
+      });
     });
+
+    // ── Newsletter subscribe ──
+    const nlForm = document.getElementById('newsletter-form');
+    if (nlForm) {
+      nlForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('newsletter-email');
+        const btn = document.getElementById('newsletter-btn');
+        const msg = document.getElementById('newsletter-msg');
+        const email = emailInput.value.trim();
+        msg.textContent = '';
+        msg.style.color = '';
+        if (!/.+@.+\..+/.test(email)) {
+          msg.textContent = 'Enter a valid email address.';
+          msg.style.color = '#ffb0b0';
+          return;
+        }
+        btn.disabled = true; const t = btn.textContent; btn.textContent = 'Subscribing…';
+        try {
+          const res = await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, source: 'homepage' })
+          });
+          const j = await res.json();
+          if (res.ok) {
+            msg.textContent = j.message || 'Subscribed.';
+            msg.style.color = '#7ee0a6';
+            nlForm.reset();
+          } else {
+            msg.textContent = j.error || 'Could not subscribe.';
+            msg.style.color = '#ffb0b0';
+          }
+        } catch {
+          msg.textContent = 'Network error. Try again in a moment.';
+          msg.style.color = '#ffb0b0';
+        } finally {
+          btn.disabled = false; btn.textContent = t;
+        }
+      });
+    }
 
     // ── Scroll Animations ──
     const observer = new IntersectionObserver((entries) => {

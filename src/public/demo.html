@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book a demo — RentVolt</title>
+<meta name="description" content="See RentVolt in action against your stack. 20-minute demo with the team at Groundwork Labs. No slide deck, no sales pressure.">
+<meta name="robots" content="index,follow">
+<style>
+  :root { --bg:#0a0a1a; --fg:#fff; --muted:rgba(255,255,255,0.72); --accent:#00d4ff; --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.12); }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;padding:24px}
+  .wrap{max-width:640px;margin:0 auto;padding:40px 0}
+  nav{margin-bottom:32px}
+  nav a{color:var(--fg);text-decoration:none;font-size:14px;margin-right:16px}
+  h1{font-size:32px;margin:0 0 12px;letter-spacing:-0.01em}
+  .lede{color:var(--muted);margin:0 0 32px;font-size:16px;line-height:1.6}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:32px}
+  label{display:block;margin:16px 0 6px;color:var(--muted);font-size:13px;font-weight:500}
+  input,select,textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--fg);padding:12px 14px;border-radius:8px;font:inherit;font-size:14px}
+  textarea{min-height:90px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  .btn{width:100%;background:var(--accent);color:#000;padding:14px;border:none;border-radius:8px;font-weight:600;font-size:15px;cursor:pointer;margin-top:24px}
+  .btn:disabled{opacity:.6;cursor:default}
+  .ok{color:#7ee0a6;background:rgba(126,224,166,.08);border:1px solid rgba(126,224,166,.3);padding:14px;border-radius:8px;margin-top:16px;display:none;font-size:14px}
+  .err{color:#ffb0b0;margin-top:10px;font-size:13px;display:none}
+  .foot{color:var(--muted);font-size:12px;margin-top:16px;text-align:center}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav><a href="/">← Home</a><a href="/pricing">Pricing</a><a href="/api-docs">Docs</a></nav>
+    <h1>Book a 20-minute demo</h1>
+    <p class="lede">We'll show RentVolt against your stack — no slides, no pressure. Bring a ZIP code or an address you're curious about. We'll reply from <code>sales@groundworklabs.io</code> within one business day.</p>
+    <form id="demo-form" class="card" autocomplete="on">
+      <label for="email">Work email <span style="color:#ffb0b0">*</span></label>
+      <input id="email" name="email" type="email" required autocomplete="email" placeholder="you@company.com">
+      <label for="company">Company</label>
+      <input id="company" name="company" type="text" autocomplete="organization" placeholder="Acme PropTech">
+      <label for="useCase">What are you building?</label>
+      <textarea id="useCase" name="useCase" placeholder="e.g. AI agent that answers rental questions for our users, batch comparable analysis for underwriting, Section 8 coverage map…"></textarea>
+      <label for="volume">Estimated monthly request volume</label>
+      <select id="volume" name="volume">
+        <option value="">— select —</option>
+        <option>&lt; 5,000</option>
+        <option>5,000 – 25,000</option>
+        <option>25,000 – 100,000</option>
+        <option>100,000 – 1M</option>
+        <option>&gt; 1M / enterprise</option>
+      </select>
+      <label for="notes">Anything else?</label>
+      <textarea id="notes" name="notes" placeholder="Optional"></textarea>
+      <button type="submit" class="btn" id="submit-btn">Request demo</button>
+      <div id="ok" class="ok" role="alert" aria-live="polite"></div>
+      <div id="err" class="err" role="alert" aria-live="assertive"></div>
+      <p class="foot">By submitting, you agree to our <a href="/legal/privacy" style="color:var(--accent)">Privacy Policy</a>. We'll reach out from sales@groundworklabs.io.</p>
+    </form>
+  </div>
+<script>
+document.getElementById('demo-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const btn = document.getElementById('submit-btn');
+  const ok = document.getElementById('ok');
+  const err = document.getElementById('err');
+  ok.style.display = 'none'; err.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const data = {
+    email: f.email.value.trim(),
+    company: f.company.value.trim() || undefined,
+    useCase: f.useCase.value.trim() || undefined,
+    volume: f.volume.value || undefined,
+    notes: f.notes.value.trim() || undefined
+  };
+  try {
+    const res = await fetch('/api/demo-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const j = await res.json();
+    if (res.ok) {
+      ok.textContent = j.message || 'Thanks — we\'ll be in touch within one business day.';
+      ok.style.display = 'block';
+      f.reset();
+    } else {
+      err.textContent = j.error || 'Could not submit. Please try again or email sales@groundworklabs.io directly.';
+      err.style.display = 'block';
+    }
+  } catch {
+    err.textContent = 'Network error. Email sales@groundworklabs.io and we\'ll respond the same way.';
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Request demo';
+  }
+});
+</script>
+</body>
+</html>
