@@ -310,7 +310,7 @@ app.get('/api/health/sources', async (req, res) => {
       ? check('rentcast', 'https://api.rentcast.io/v1/listings/rental/long-term?city=Austin&state=TX&limit=1', { 'X-Api-Key': process.env.RENTCAST_API_KEY })
       : Promise.resolve({ name: 'rentcast', ok: false, error: 'RENTCAST_API_KEY not configured' }),
     process.env.HUD_API_TOKEN
-      ? check('hud', 'https://www.huduser.gov/hudapi/public/fmr/data/78701?year=' + new Date().getFullYear(), { Authorization: `Bearer ${process.env.HUD_API_TOKEN}` })
+      ? check('hud', 'https://www.huduser.gov/hudapi/public/fmr/listStates', { Authorization: `Bearer ${process.env.HUD_API_TOKEN}` })
       : Promise.resolve({ name: 'hud', ok: false, error: 'HUD_API_TOKEN not configured' }),
     check('census', 'https://api.census.gov/data/2023/acs/acs5?get=B25064_001E&for=zip%20code%20tabulation%20area:78701' + (process.env.CENSUS_API_KEY ? `&key=${process.env.CENSUS_API_KEY}` : ''))
   ]);
