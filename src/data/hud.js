@@ -29,9 +29,14 @@ const fetchFmrByZip = async (zip, year) => {
     new Date().getFullYear() - 1,
     new Date().getFullYear() - 2
   ];
+  // HUD's FMR API documents a ZIP-code-specific path (not /data/{zip}). Try the
+  // SAFMR-style path first, then fall through. Reference:
+  // https://www.huduser.gov/portal/dataset/fmr-api.html
   const attempts = [
+    ...years.map((y) => `/smallarea/${zip}?year=${y}`),
     ...years.map((y) => `/data/${zip}?year=${y}`),
-    `/data/${zip}` // no year — HUD picks latest
+    `/smallarea/${zip}`,
+    `/data/${zip}`
   ];
   let lastErr;
   for (const path of attempts) {
