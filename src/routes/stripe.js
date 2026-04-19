@@ -23,7 +23,7 @@ const PLANS = {
   },
   enterprise: {
     priceId: process.env.STRIPE_PRICE_ENTERPRISE || 'price_1TJWZqK6Cynlh5jwzfSBOov1',
-    name: 'RentVolt Business',
+    name: 'RentVolt Enterprise',
     monthlyRequests: 25000,
     price: 14900
   }

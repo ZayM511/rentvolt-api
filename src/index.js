@@ -140,7 +140,6 @@ app.get('/success', servePublic('success.html'));
 app.get('/cancel',  servePublic('cancel.html'));
 app.get('/dashboard', servePublic('dashboard.html'));
 app.get('/privacy-request', servePublic('privacy-request.html'));
-app.get('/demo', servePublic('demo.html'));
 
 // ─── Changelog ──────────────────────────────────────────
 app.get('/changelog', (req, res) => {
@@ -588,42 +587,6 @@ app.post('/api/subscribe', async (req, res) => {
   }
 });
 
-// ─── Enterprise demo request ────────────────────────────
-app.post('/api/demo-request', async (req, res) => {
-  try {
-    const b = req.body || {};
-    const email = String(b.email || '').toLowerCase().trim();
-    if (!/.+@.+\..+/.test(email)) return res.status(400).json({ error: 'Enter a valid email' });
-    const { send, sendDemoRequestConfirmation } = require('./email');
-    await db.query(
-      `INSERT INTO demo_requests (email, company, use_case, volume, notes, ip)
-         VALUES ($1, $2, $3, $4, $5, $6::inet)`,
-      [email, b.company || null, b.useCase || null, b.volume || null, b.notes || null, req.ip]
-    );
-    // Notify sales
-    send({
-      to: 'sales@groundworklabs.io',
-      subject: `[RentVolt] Demo request from ${email}`,
-      html: `<p>New enterprise demo request:</p>
-        <ul>
-          <li><b>Email:</b> ${email}</li>
-          <li><b>Company:</b> ${(b.company || '—').replace(/[<>]/g, '')}</li>
-          <li><b>Use case:</b> ${(b.useCase || '—').replace(/[<>]/g, '')}</li>
-          <li><b>Volume:</b> ${(b.volume || '—').replace(/[<>]/g, '')}</li>
-          <li><b>Notes:</b> ${(b.notes || '—').replace(/[<>]/g, '')}</li>
-        </ul>`
-    }).catch((err) => console.warn('[demo-request] sales email failed:', err.message));
-    // Confirm to the requester
-    sendDemoRequestConfirmation({ to: email, company: b.company || '' }).catch((err) =>
-      console.warn('[demo-request] confirmation email failed:', err.message)
-    );
-    res.json({ success: true, message: 'Thanks — we sent you a confirmation email, and a human will reply within one business day.' });
-  } catch (err) {
-    console.error('[demo-request] error:', err.message);
-    res.status(500).json({ error: 'Could not submit request' });
-  }
-});
-
 // ─── Feedback (cancel-page) ─────────────────────────────
 app.post('/api/feedback', validate(schemas.feedback), async (req, res) => {
   try {
@@ -676,7 +639,7 @@ app.use('/api', (req, res, next) => {
     '/stripe/checkout', '/stripe/plans', '/stripe/webhook', '/stripe/session',
     '/feedback', '/privacy-request', '/keys/free',
     '/auth/request-link', '/auth/consume-link', '/auth/signout',
-    '/me', '/health/sources', '/stats', '/subscribe', '/demo-request'
+    '/me', '/health/sources', '/stats', '/subscribe'
   ];
   if (publicPaths.some((p) => req.path === p || req.path.startsWith(`${p}/`))) return next();
   return apiKeyAuth(req, res, next);

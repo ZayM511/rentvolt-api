@@ -15,9 +15,8 @@ See our [API Versioning & Deprecation Policy](/legal/api-versioning) for the con
 - Market-context overlay from **HUD Fair Market Rent** (Small Area FMR with MSA-level fallback) and **US Census ACS** (median gross rent, median household income, vacancy rate, total housing units).
 - LLM-friendly **briefing endpoint**: `GET /api/market/briefing/:zip?state=xx` returns a single sourced paragraph summarizing a ZIP's rental market.
 - AI-agent helpers: function-calling JSON schema in every response, MCP-server-ready shape.
-- Pricing tiers self-serve via Stripe: **Starter** (free, 100 req/mo), **Growth** ($19/mo, 1,000), **Scale** ($49/mo, 5,000), **Business** ($149/mo, 25,000). Custom plans via `/demo`.
+- Pricing tiers self-serve via Stripe: **Starter** (free, 100 req/mo), **Growth** ($19/mo, 1,000), **Scale** ($49/mo, 5,000), **Enterprise** ($149/mo, 25,000).
 - Magic-link dashboard auth at `/dashboard` with per-session cookies (HMAC-signed, 30-day).
-- Enterprise-lead form at `/demo` with confirmation emails to both requester and `sales@groundworklabs.io`.
 - Newsletter widget on the homepage with double-opt-in-style confirmation email.
 - `/api/health/sources` upstream probe for RentCast / HUD / Census.
 - Admin endpoints behind `x-admin-token`: `/api/admin/costs` (per-source/per-plan monthly cost rollup) and `/api/admin/retention` (DAU/WAU/MAU + churn).
@@ -38,4 +37,4 @@ See our [API Versioning & Deprecation Policy](/legal/api-versioning) for the con
 
 ---
 
-Have a feature request or bug report? Email **[support@groundworklabs.io](mailto:support@groundworklabs.io)** or book time via **[/demo](/demo)**.
+Have a feature request or bug report? Email **[support@groundworklabs.io](mailto:support@groundworklabs.io)**.

@@ -67,20 +67,6 @@ const subscribeTemplate = () => `
   </body></html>
 `;
 
-const demoRequestConfirmationTemplate = ({ company }) => `
-  <!doctype html>
-  <html><body style="font-family: -apple-system, Segoe UI, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; color: #111;">
-    <h1 style="color: #0a0a1a;">Thanks — we got your demo request</h1>
-    <p>A human at Groundwork Labs will reply within one business day from <a href="mailto:sales@groundworklabs.io">sales@groundworklabs.io</a>${company ? ` regarding <strong>${escape(company)}</strong>` : ''}.</p>
-    <p>In the meantime, feel free to:</p>
-    <ul>
-      <li>Grab a free API key at <a href="${process.env.BASE_URL || 'https://rentvolt.io'}/pricing">/pricing</a> (100 req/mo, no card)</li>
-      <li>Skim the docs at <a href="${process.env.BASE_URL || 'https://rentvolt.io'}/api-docs">/api-docs</a></li>
-    </ul>
-    <p style="font-size: 12px; color: #666;">— The Groundwork Labs team</p>
-  </body></html>
-`;
-
 const sendWelcomeEmail = ({ to, plan, apiKey }) =>
   send({ to, subject: 'Welcome to RentVolt — your API key is ready', html: welcomeTemplate({ plan, apiKey }) });
 
@@ -93,14 +79,10 @@ const sendUsageAlertEmail = ({ to, plan, used, limit, pct }) =>
 const sendSubscribeConfirmation = ({ to }) =>
   send({ to, subject: "You're on the RentVolt list", html: subscribeTemplate() });
 
-const sendDemoRequestConfirmation = ({ to, company }) =>
-  send({ to, subject: 'Thanks — your RentVolt demo request is in', html: demoRequestConfirmationTemplate({ company }) });
-
 module.exports = {
   send,
   sendWelcomeEmail,
   sendMagicLinkEmail,
   sendUsageAlertEmail,
-  sendSubscribeConfirmation,
-  sendDemoRequestConfirmation
+  sendSubscribeConfirmation
 };

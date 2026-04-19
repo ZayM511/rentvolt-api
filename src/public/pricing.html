@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pricing — RentVolt</title>
-<meta name="description" content="Simple, predictable pricing for the RentVolt rental-intelligence API. Starter free, Growth $19/mo, Scale $49/mo, Business $149/mo. Cancel anytime.">
+<meta name="description" content="Simple, predictable pricing for the RentVolt rental-intelligence API. Starter free, Growth $19/mo, Scale $49/mo, Enterprise $149/mo. Cancel anytime.">
 <style>
   :root { --bg:#0a0a1a; --fg:#fff; --muted:rgba(255,255,255,0.72); --accent:#00d4ff; --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.12); }
   *{box-sizing:border-box}
@@ -47,7 +47,7 @@
       <div>
         <a href="/">Home</a>
         <a href="/api-docs">Docs</a>
-        <a href="/dashboard">Dashboard</a>
+        <a href="/dashboard">Sign in</a>
       </div>
     </nav>
 
@@ -102,7 +102,7 @@
       </div></div>
 
       <div class="tier-wrap"><div class="tier">
-        <div class="name">Business</div>
+        <div class="name">Enterprise</div>
         <div class="price">$149 <small>/ mo</small></div>
         <div class="quota">25,000 requests / month</div>
         <ul class="feat">
@@ -112,15 +112,10 @@
           <li>Bulk endpoint &amp; webhook alerts</li>
           <li>Fair Housing compliance docs on request</li>
         </ul>
-        <button class="btn" data-action="checkout" data-plan="enterprise">Start Business — $149/mo</button>
+        <button class="btn" data-action="checkout" data-plan="enterprise">Start Enterprise — $149/mo</button>
         <div class="arl-note">Auto-renews monthly at $149 until you cancel.</div>
       </div></div>
     </div>
-
-    <p style="text-align:center;color:var(--muted);font-size:13px;margin:-10px 0 28px">
-      Need more than 25,000 req/mo, a custom SLA, a signed MSA, or annual invoicing?
-      <a href="/demo" style="color:var(--accent)">Book a 20-minute call</a> — we'll scope a custom plan.
-    </p>
 
     <div id="err" class="err"></div>
 
