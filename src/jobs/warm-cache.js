@@ -1,17 +1,34 @@
 // Proactive cache warming for top cities.
 // Reduces cold-start latency on popular demo queries and smooths RentCast
 // billing across the day. Runs once at boot, then every 6h.
+// Top ~50 US rental markets by population + demand. Expanded from 30 so
+// non-coastal demo queries hit warm cache instead of paying a cold-start.
 const TOP_CITIES = [
+  // West coast
   ['oakland', 'ca'], ['san-francisco', 'ca'], ['san-jose', 'ca'],
   ['los-angeles', 'ca'], ['san-diego', 'ca'], ['sacramento', 'ca'],
-  ['seattle', 'wa'], ['portland', 'or'],
+  ['long-beach', 'ca'], ['fresno', 'ca'], ['bakersfield', 'ca'],
+  ['seattle', 'wa'], ['portland', 'or'], ['boise', 'id'],
+  // Southwest / mountain
   ['austin', 'tx'], ['dallas', 'tx'], ['houston', 'tx'],
-  ['denver', 'co'], ['salt-lake-city', 'ut'], ['phoenix', 'az'],
+  ['san-antonio', 'tx'], ['fort-worth', 'tx'], ['el-paso', 'tx'],
+  ['denver', 'co'], ['colorado-springs', 'co'],
+  ['salt-lake-city', 'ut'], ['phoenix', 'az'], ['tucson', 'az'],
+  ['las-vegas', 'nv'], ['albuquerque', 'nm'],
+  // Midwest
   ['chicago', 'il'], ['minneapolis', 'mn'],
-  ['new-york', 'ny'], ['boston', 'ma'], ['philadelphia', 'pa'], ['washington', 'dc'],
-  ['miami', 'fl'], ['tampa', 'fl'], ['orlando', 'fl'], ['atlanta', 'ga'],
-  ['charlotte', 'nc'], ['raleigh', 'nc'], ['nashville', 'tn'],
-  ['columbus', 'oh'], ['pittsburgh', 'pa'], ['detroit', 'mi']
+  ['columbus', 'oh'], ['cleveland', 'oh'], ['cincinnati', 'oh'],
+  ['indianapolis', 'in'], ['milwaukee', 'wi'], ['detroit', 'mi'],
+  ['kansas-city', 'mo'], ['st-louis', 'mo'],
+  // Northeast
+  ['new-york', 'ny'], ['boston', 'ma'], ['philadelphia', 'pa'],
+  ['pittsburgh', 'pa'], ['washington', 'dc'], ['baltimore', 'md'],
+  ['newark', 'nj'],
+  // Southeast
+  ['miami', 'fl'], ['tampa', 'fl'], ['orlando', 'fl'], ['jacksonville', 'fl'],
+  ['atlanta', 'ga'], ['charlotte', 'nc'], ['raleigh', 'nc'],
+  ['nashville', 'tn'], ['memphis', 'tn'], ['louisville', 'ky'],
+  ['new-orleans', 'la']
 ];
 const WARM_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6h
 const BATCH_SIZE = 3; // concurrent RentCast calls
