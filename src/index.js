@@ -391,9 +391,7 @@ app.get('/demo/listings', async (req, res) => {
         marketContext = {
           zip: firstZip,
           hud: trends.hud || null,
-          census: trends.census || null,
-          ...(trends.hudError    ? { _debug_hudError:    trends.hudError }    : {}),
-          ...(trends.censusError ? { _debug_censusError: trends.censusError } : {})
+          census: trends.census || null
         };
         if (trends.hudError)    console.warn('[demo/listings] HUD unavailable:',    trends.hudError);
         if (trends.censusError) console.warn('[demo/listings] Census unavailable:', trends.censusError);
