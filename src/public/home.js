@@ -196,6 +196,45 @@
       return;
     }
     if (resultsCount) resultsCount.textContent = data.total + ' listings · ' + Object.keys(data.sources || {}).length + ' source(s)';
+
+    // ── Market context card (HUD FMR + Census) ──
+    const mc = data.marketContext;
+    if (mc && (mc.hud || mc.census)) {
+      const card = el('div', 'market-context');
+      card.appendChild(el('div', 'mc-label', 'Market context · ZIP ' + (mc.zip || '—')));
+      const grid = el('div', 'mc-grid');
+      const twoBr = mc.hud?.fmr?.twoBr;
+      if (twoBr) {
+        const s = el('div', 'mc-stat');
+        s.appendChild(el('div', 'mc-stat-value', '$' + Number(twoBr).toLocaleString()));
+        s.appendChild(el('div', 'mc-stat-label', 'HUD Fair Market Rent · 2BR'));
+        grid.appendChild(s);
+      }
+      const mgr = mc.census?.medianGrossRent;
+      if (mgr) {
+        const s = el('div', 'mc-stat');
+        s.appendChild(el('div', 'mc-stat-value', '$' + Number(mgr).toLocaleString()));
+        s.appendChild(el('div', 'mc-stat-label', 'Census median gross rent'));
+        grid.appendChild(s);
+      }
+      const inc = mc.census?.medianHouseholdIncome;
+      if (inc) {
+        const s = el('div', 'mc-stat');
+        s.appendChild(el('div', 'mc-stat-value', '$' + Number(inc).toLocaleString()));
+        s.appendChild(el('div', 'mc-stat-label', 'Median household income'));
+        grid.appendChild(s);
+      }
+      const vac = mc.census?.vacancyRate;
+      if (vac != null) {
+        const s = el('div', 'mc-stat');
+        s.appendChild(el('div', 'mc-stat-value', vac + '%'));
+        s.appendChild(el('div', 'mc-stat-label', 'Rental vacancy rate'));
+        grid.appendChild(s);
+      }
+      card.appendChild(grid);
+      resultsBody.appendChild(card);
+    }
+
     const wrap = el('div', 'listings-container');
     data.listings.forEach((l, i) => {
       const card = el('div', 'listing-card');

@@ -20,6 +20,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="apple-touch-icon" href="/logo.png">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -214,6 +216,19 @@
       backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       font-weight: 500;
     }
+    /* ── Market-context card (demo response) ── */
+    .market-context {
+      background: linear-gradient(135deg, rgba(0,212,255,0.06), rgba(99,102,241,0.04));
+      border: 1px solid rgba(0,212,255,0.2); border-radius: 12px;
+      padding: 18px 20px; margin-bottom: 16px;
+    }
+    .mc-label {
+      font-size: 0.72rem; font-weight: 600; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px;
+    }
+    .mc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+    .mc-stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+    .mc-stat-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
     /* ── /#tryit language snippet tabs (B2) ── */
     .snippet-tab {
       background: transparent; color: var(--text-muted); border: none;
@@ -646,7 +661,7 @@
 
   <!-- ── Navigation ── -->
   <nav class="nav" id="nav">
-    <div class="nav-logo"><span>&#9889;</span> RentVolt</div>
+    <div class="nav-logo"><img src="/logo.png" alt="" aria-hidden="true" width="28" height="28" style="vertical-align:middle;border-radius:6px"> RentVolt</div>
     <button class="nav-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
       <span></span><span></span><span></span>
     </button>
@@ -1048,7 +1063,7 @@
   <footer>
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="nav-logo"><span>&#9889;</span> RentVolt</div>
+        <div class="nav-logo"><img src="/logo.png" alt="" aria-hidden="true" width="28" height="28" style="vertical-align:middle;border-radius:6px"> RentVolt</div>
         <p>Real-time rental data aggregation for developers, investors, and researchers. A Groundwork Labs product.</p>
       </div>
       <div class="footer-col">

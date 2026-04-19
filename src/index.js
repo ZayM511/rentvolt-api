@@ -376,10 +376,29 @@ app.get('/demo/listings', async (req, res) => {
       [ip]
     );
 
-    const results = await fetchListings(city, state, { limit: 5 });
+    const results = await fetchListings(city, state, { limit: 25 });
     const sourcesPresent = Object.entries(results.sources || {}).filter(([, v]) => v > 0).map(([k]) => k);
+
+    // Augment with HUD + Census context using the first listing's ZIP (if any).
+    let marketContext = null;
+    const firstZip = results.listings?.find((l) => l.zip)?.zip;
+    if (firstZip) {
+      const { fetchMarketTrends } = require('./data');
+      try {
+        const trends = await fetchMarketTrends(firstZip);
+        if (trends.hud) sourcesPresent.push('hud');
+        if (trends.census) sourcesPresent.push('census');
+        marketContext = {
+          zip: firstZip,
+          hud: trends.hud || null,
+          census: trends.census || null
+        };
+      } catch (err) {
+        console.warn('[demo/listings] market context unavailable:', err.message);
+      }
+    }
+
     res.set('X-Data-Sources', sourcesPresent.join(',') || 'none');
-    // Fail loudly if no upstream returned data
     if (sourcesPresent.length === 0) {
       return res.status(502).json({
         success: false,
@@ -388,7 +407,18 @@ app.get('/demo/listings', async (req, res) => {
         message: 'Check /api/health/sources for current status.'
       });
     }
-    res.json({ success: true, ...results });
+
+    // Merge source counts for the response
+    const sourcesMap = { ...(results.sources || {}) };
+    if (marketContext?.hud)    sourcesMap.hud = 1;
+    if (marketContext?.census) sourcesMap.census = 1;
+
+    res.json({
+      success: true,
+      ...results,
+      sources: sourcesMap,
+      marketContext
+    });
   } catch (err) {
     console.error('[demo/listings] error:', err.message, err.stack);
     res.status(500).json({
