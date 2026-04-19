@@ -15,12 +15,17 @@ const axClient = axios.create({ timeout: TIMEOUT_MS, headers: { Accept: 'applica
 const fetchAcsByZip = async (zip, year) => {
   const y = year || 2023; // ACS 5-year lags ~2 years
   const vars = 'B25064_001E,B25002_001E,B25002_003E,B19013_001E';
-  const key = process.env.CENSUS_API_KEY ? `&key=${process.env.CENSUS_API_KEY}` : '';
-  const url = `${ACS_BASE}/${y}/acs/acs5?get=${vars}&for=zip%20code%20tabulation%20area:${zip}${key}`;
+  // Drop key param entirely — Census ACS works keyless for low-volume use
+  // and an invalid key returns an error object that breaks array-destructure parsing.
+  const url = `${ACS_BASE}/${y}/acs/acs5?get=${vars}&for=zip%20code%20tabulation%20area:${zip}`;
   const { data } = await axClient.get(url);
-  // Response: [[headers...], [values...]]
+  // Expected response shape: [[headers...], [values...]]
+  // Census sometimes returns an error object (e.g. invalid vars) or HTML on outage.
+  if (!Array.isArray(data) || data.length < 2 || !Array.isArray(data[0]) || !Array.isArray(data[1])) {
+    const preview = typeof data === 'string' ? data.slice(0, 120) : JSON.stringify(data).slice(0, 120);
+    throw new Error(`Census returned unexpected shape: ${preview}`);
+  }
   const [headers, values] = data;
-  if (!values) return null;
   const row = {};
   headers.forEach((h, i) => { row[h] = values[i]; });
   return {
