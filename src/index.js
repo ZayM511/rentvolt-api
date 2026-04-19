@@ -489,9 +489,48 @@ app.use((err, req, res, _next) => {
   });
 });
 
+// ─── Boot-time migration safety net ─────────────────────
+// Ensures schema tables exist even if the separate `npm run migrate`
+// step didn't run (e.g. Render build env lacks DATABASE_URL).
+// Idempotent — the migration runner is gated on schema_migrations.
+async function ensureSchema() {
+  if (!process.env.DATABASE_URL) {
+    console.warn('[boot] DATABASE_URL missing — skipping schema ensure');
+    return;
+  }
+  try {
+    const fs = require('fs');
+    const p = require('path');
+    const MIG = p.join(__dirname, '..', 'migrations');
+    await db.query(`CREATE TABLE IF NOT EXISTS schema_migrations (version text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())`);
+    const { rows: applied } = await db.query('SELECT version FROM schema_migrations');
+    const have = new Set(applied.map((r) => r.version));
+    const files = fs.readdirSync(MIG).filter((f) => f.endsWith('.sql')).sort();
+    for (const f of files) {
+      const v = f.replace(/\.sql$/, '');
+      if (have.has(v)) continue;
+      console.log(`[boot] applying migration ${v}…`);
+      const sql = fs.readFileSync(p.join(MIG, f), 'utf8');
+      await db.query('BEGIN');
+      try {
+        await db.query(sql);
+        await db.query('COMMIT');
+        console.log(`[boot] ✓ ${v}`);
+      } catch (err) {
+        await db.query('ROLLBACK').catch(() => {});
+        console.error(`[boot] ✗ ${v}:`, err.message);
+        throw err;
+      }
+    }
+  } catch (err) {
+    console.error('[boot] schema ensure failed:', err.message);
+    // Do not crash the process — API can still serve static routes while ops fix the DB.
+  }
+}
+
 // ─── Start (only when run directly, not when imported for tests) ─
 if (require.main === module) {
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, async () => {
     console.log(`
 ╔═══════════════════════════════════════════════╗
 ║   RentVolt API  v2.0.0                        ║
@@ -500,6 +539,7 @@ if (require.main === module) {
 ║   Port ${String(PORT).padEnd(6)} │ ${(process.env.NODE_ENV || 'development').padEnd(22)}║
 ╚═══════════════════════════════════════════════╝
   `);
+    await ensureSchema();
   });
 
   const shutdown = (signal) => {
