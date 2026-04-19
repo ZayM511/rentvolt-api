@@ -188,7 +188,10 @@
     if (resultsCount) resultsCount.textContent = 'Loading…';
   }
 
+  let lastResponse = null;
+
   function render(data) {
+    lastResponse = data;
     clear(resultsBody);
     if (!data.listings || data.listings.length === 0) {
       message('🤷', 'No listings found', 'Try a different city or check the docs.');
@@ -238,7 +241,10 @@
     const wrap = el('div', 'listings-container');
     data.listings.forEach((l, i) => {
       const card = el('div', 'listing-card');
-      card.style.animationDelay = (i * 0.08) + 's';
+      card.style.animationDelay = (Math.min(i, 10) * 0.05) + 's';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('title', 'Click to copy this listing as JSON');
       const header = el('div', 'listing-header');
       header.appendChild(el('span', 'source-badge source-apartments', l.source || 'rentcast'));
       const price = el('span', 'listing-price', '$' + (typeof l.price === 'number' ? l.price.toLocaleString() : (l.price || '—')));
@@ -251,9 +257,40 @@
       if (l.baths) details.appendChild(el('span', 'detail-badge', l.baths));
       if (l.sqft)  details.appendChild(el('span', 'detail-badge', l.sqft + ' sqft'));
       card.appendChild(details);
+      card.appendChild(el('span', 'copy-hint', 'Click to copy'));
+      const copyListing = () => {
+        navigator.clipboard.writeText(JSON.stringify(l, null, 2)).then(() => {
+          card.classList.add('copied');
+          const hint = card.querySelector('.copy-hint');
+          if (hint) { const t = hint.textContent; hint.textContent = '✓ Copied'; hint.style.opacity = '1'; setTimeout(() => { hint.textContent = t; hint.style.opacity = ''; card.classList.remove('copied'); }, 1500); }
+        }).catch(() => {});
+      };
+      card.addEventListener('click', copyListing);
+      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copyListing(); } });
       wrap.appendChild(card);
     });
     resultsBody.appendChild(wrap);
+    // Scroll the results body to top after render
+    resultsBody.scrollTop = 0;
+  }
+
+  // ── Copy JSON (full response) ──
+  const copyJsonBtn = document.getElementById('copyJsonBtn');
+  if (copyJsonBtn) {
+    copyJsonBtn.addEventListener('click', () => {
+      if (!lastResponse) {
+        copyJsonBtn.textContent = 'Run demo first';
+        setTimeout(() => { copyJsonBtn.textContent = 'Copy JSON'; }, 1600);
+        return;
+      }
+      navigator.clipboard.writeText(JSON.stringify(lastResponse, null, 2)).then(() => {
+        copyJsonBtn.textContent = '✓ Copied!';
+        setTimeout(() => { copyJsonBtn.textContent = 'Copy JSON'; }, 1800);
+      }).catch(() => {
+        copyJsonBtn.textContent = 'Copy failed';
+        setTimeout(() => { copyJsonBtn.textContent = 'Copy JSON'; }, 1800);
+      });
+    });
   }
 
   if (executeBtn && citySelect && resultsBody) {

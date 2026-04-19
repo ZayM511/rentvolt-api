@@ -368,14 +368,40 @@
     .tryit-note { font-size: 0.8em; color: var(--text-muted); margin-top: 16px; text-align: center; }
     .tryit-results {
       background: var(--glass-bg); border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg); padding: 32px; min-height: 400px;
+      border-radius: var(--radius-lg); padding: 32px;
+      height: 600px; max-height: 80vh;
       display: flex; flex-direction: column;
     }
     .tryit-results-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--glass-border);
+      flex-shrink: 0;
     }
-    .tryit-results-header h3 { font-size: 1em; color: var(--text-secondary); }
+    .tryit-results-header h3 { font-size: 1em; color: var(--text-secondary); margin: 0; }
+    .tryit-results-header .copy-json {
+      background: transparent; color: var(--accent); border: 1px solid rgba(0,212,255,0.25);
+      padding: 5px 12px; border-radius: 6px; font-size: 0.78em; font-family: inherit;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    }
+    .tryit-results-header .copy-json:hover { background: rgba(0,212,255,0.08); border-color: var(--accent); }
+    #resultsBody {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      /* Subtle scroll indicator styling */
+      scrollbar-width: thin; scrollbar-color: rgba(0,212,255,0.3) transparent;
+      padding-right: 4px;
+    }
+    #resultsBody::-webkit-scrollbar { width: 6px; }
+    #resultsBody::-webkit-scrollbar-track { background: transparent; }
+    #resultsBody::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.25); border-radius: 3px; }
+    #resultsBody::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.5); }
+    .listing-card { cursor: pointer; }
+    .listing-card.copied { border-color: var(--accent) !important; }
+    .listing-card .copy-hint {
+      font-size: 0.7rem; color: var(--text-muted); opacity: 0; transition: opacity 0.2s;
+      position: absolute; top: 8px; right: 12px;
+    }
+    .listing-card { position: relative; }
+    .listing-card:hover .copy-hint { opacity: 1; }
     .results-placeholder {
       flex: 1; display: flex; align-items: center; justify-content: center;
       color: var(--text-muted); font-size: 0.95em; text-align: center; padding: 40px;
@@ -845,8 +871,11 @@
         </div>
         <div class="tryit-results" id="resultsPanel">
           <div class="tryit-results-header">
-            <h3>Response</h3>
-            <span id="resultsCount" style="font-size:0.85em;color:var(--text-muted)"></span>
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
+              <h3>Response</h3>
+              <span id="resultsCount" style="font-size:0.85em;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+            </div>
+            <button type="button" class="copy-json" id="copyJsonBtn" aria-label="Copy full JSON response to clipboard" title="Copy the raw JSON response">Copy JSON</button>
           </div>
           <div id="resultsBody">
             <div class="results-placeholder">
