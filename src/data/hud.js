@@ -29,15 +29,14 @@ const fetchFmrByZip = async (zip, year) => {
     new Date().getFullYear() - 1,
     new Date().getFullYear() - 2
   ];
-  // HUD's FMR API documents a ZIP-code-specific path (not /data/{zip}). Try the
-  // SAFMR-style path first, then fall through. Reference:
-  // https://www.huduser.gov/portal/dataset/fmr-api.html
-  const attempts = [
-    ...years.map((y) => `/smallarea/${zip}?year=${y}`),
-    ...years.map((y) => `/data/${zip}?year=${y}`),
-    `/smallarea/${zip}`,
-    `/data/${zip}`
-  ];
+  // Note: HUD's /fmr/data/{entityid} endpoint takes a HUD metro ID (e.g.
+  // METRO41940M41940), not a ZIP. Direct ZIP queries 400 with "Missing or
+  // invalid value in the query parameter(s)". Proper ZIP-level (Small Area)
+  // FMR requires: state → list metros → pick metro → fetch data → find ZIP
+  // in basicdata[]. That's a bigger integration we'll ship later. For now we
+  // try the documented URL (in case HUD opens a direct-ZIP path) and
+  // propagate the error so marketContext can degrade gracefully.
+  const attempts = years.map((y) => `/data/${zip}?year=${y}`).concat([`/data/${zip}`]);
   let lastErr;
   for (const path of attempts) {
     try {
