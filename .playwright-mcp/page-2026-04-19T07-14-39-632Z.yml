@@ -1,0 +1,302 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: ⚡
+      - text: RentVolt
+    - list [ref=e5]:
+      - listitem [ref=e6]:
+        - link "Features" [ref=e7] [cursor=pointer]:
+          - /url: "#features"
+      - listitem [ref=e8]:
+        - link "Try It" [ref=e9] [cursor=pointer]:
+          - /url: "#tryit"
+      - listitem [ref=e10]:
+        - link "Pricing" [ref=e11] [cursor=pointer]:
+          - /url: "#pricing"
+      - listitem [ref=e12]:
+        - link "Docs" [ref=e13] [cursor=pointer]:
+          - /url: /api-docs
+      - listitem [ref=e14]:
+        - link "Book a demo" [ref=e15] [cursor=pointer]:
+          - /url: /demo
+      - listitem [ref=e16]:
+        - link "Get API Key" [ref=e17] [cursor=pointer]:
+          - /url: "#pricing"
+  - generic [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]: Rental market intelligence API
+      - heading "Rental market intelligence for the internet." [level=1] [ref=e22]
+      - paragraph [ref=e23]: Live listings, HUD Fair Market Rent, and Census context in one API call. Built for AI agents, indie builders, and property-tech teams.
+      - generic [ref=e24]:
+        - link "Get API Key — Free" [ref=e25] [cursor=pointer]:
+          - /url: "#pricing"
+        - link "Try live demo ↓" [ref=e26] [cursor=pointer]:
+          - /url: "#tryit"
+      - paragraph [ref=e27]: No credit card. 100 requests/month. 2-minute setup.
+      - generic "Trust signals" [ref=e28]:
+        - generic [ref=e29]: 🏛 California LLC · B20260059957
+        - generic [ref=e30]: 🛡 CCPA / CPRA
+        - generic [ref=e31]: 🏘 Fair-Housing aligned
+        - generic [ref=e32]: 🔒 PCI via Stripe
+      - paragraph [ref=e33]: Early access · launched April 2026
+    - generic "Example API call" [ref=e34]:
+      - generic [ref=e39]: curl · rentvolt-api.onrender.com
+      - code [ref=e41]: "# Get rental listings for any US city $ curl https://rentvolt-api.onrender.com/demo/listings \\ ?city=oakland&state=ca → 200 OK (147ms · rentcast + hud + census) { \"listings\": [ { \"address\": \"371 30th St, Apt 201, Oakland, CA\", \"price\": 2500, \"beds\": 1, \"baths\": 1, \"source\": \"rentcast\" }, /* …4 more */ ], \"hud_fmr_2br\": 2680, // fair market rent \"median_income\": 74928 }"
+  - region "Data sources" [ref=e43]:
+    - paragraph [ref=e44]: Powered by
+    - generic [ref=e45]:
+      - generic [ref=e46]: RentCast (140M+ properties)
+      - generic [ref=e47]: HUD Fair Market Rents
+      - generic [ref=e48]: US Census ACS
+      - generic [ref=e49]: Public records
+      - generic [ref=e50]: AVM estimates
+  - generic [ref=e52]:
+    - generic [ref=e53]:
+      - generic [ref=e54]: "6"
+      - generic [ref=e55]: Data Sources
+    - generic [ref=e56]:
+      - generic [ref=e57]: "12"
+      - generic [ref=e58]: Optimized Cities
+    - generic [ref=e59]:
+      - generic [ref=e60]: <3s
+      - generic [ref=e61]: Avg Response
+    - generic [ref=e62]:
+      - generic [ref=e63]: 99.9%
+      - generic [ref=e64]: Uptime
+  - generic [ref=e65]:
+    - generic [ref=e66]: How It Works
+    - heading "Three Steps to Rental Data" [level=2] [ref=e67]
+    - paragraph [ref=e68]: From signup to live data in under a minute.
+    - generic [ref=e69]:
+      - generic [ref=e70]:
+        - generic [ref=e71]: "1"
+        - heading "Get Your API Key" [level=3] [ref=e72]
+        - paragraph [ref=e73]: Sign up free and get your key instantly. No credit card required.
+      - generic [ref=e74]:
+        - generic [ref=e75]: "2"
+        - heading "Make a Request" [level=3] [ref=e76]
+        - paragraph [ref=e77]: POST to /api/scrape/listings with a city and optional filters.
+      - generic [ref=e78]:
+        - generic [ref=e79]: "3"
+        - heading "Get Listings" [level=3] [ref=e80]
+        - paragraph [ref=e81]: Receive deduplicated, sorted rental data from all 6 sources.
+  - generic [ref=e83]:
+    - generic [ref=e84]: Live Demo
+    - heading "See It In Action" [level=2] [ref=e85]
+    - paragraph [ref=e86]: Pick a city and watch real rental data flow in. No API key needed.
+    - generic [ref=e87]:
+      - generic [ref=e88]:
+        - heading "Configure Request" [level=3] [ref=e89]
+        - generic [ref=e90]:
+          - generic [ref=e91]: Select a City
+          - combobox "Select a City" [ref=e92] [cursor=pointer]:
+            - option "Oakland, CA" [selected]
+            - option "San Francisco, CA"
+            - option "San Jose, CA"
+            - option "Los Angeles, CA"
+            - option "Seattle, WA"
+            - option "Portland, OR"
+            - option "Austin, TX"
+            - option "Denver, CO"
+            - option "Chicago, IL"
+            - option "New York, NY"
+            - option "Boston, MA"
+            - option "Miami, FL"
+        - button "⚡ Execute Request" [ref=e93] [cursor=pointer]
+        - paragraph [ref=e94]: Free demo · 3 requests per day · Real data
+      - generic [ref=e95]:
+        - heading "Response" [level=3] [ref=e97]
+        - generic [ref=e100]:
+          - generic [ref=e101]: 🔍
+          - text: Select a city and hit Execute to see live rental listings
+  - generic [ref=e102]:
+    - generic [ref=e103]: Features
+    - heading "Everything You Need" [level=2] [ref=e104]
+    - paragraph [ref=e105]: A complete rental data API built for speed and reliability.
+    - generic [ref=e106]:
+      - generic [ref=e107]:
+        - generic [ref=e108]: ⚡
+        - heading "6 Sources, 1 Call" [level=3] [ref=e109]
+        - paragraph [ref=e110]: One licensed API for rental listings, HUD benchmarks, Census demographics, and market trends — with a normalized JSON shape that's a joy to work with.
+      - generic [ref=e111]:
+        - generic [ref=e112]: 🔍
+        - heading "Smart Filtering" [level=3] [ref=e113]
+        - paragraph [ref=e114]: Filter by price, bedrooms, and source. Results are automatically deduplicated by address and sorted by price.
+      - generic [ref=e115]:
+        - generic [ref=e116]: 📦
+        - heading "Bulk Queries" [level=3] [ref=e117]
+        - paragraph [ref=e118]: Query up to 10 cities in a single request. Perfect for market analysis across multiple metro areas.
+      - generic [ref=e119]:
+        - generic [ref=e120]: 🔑
+        - heading "Simple Auth" [level=3] [ref=e121]
+        - paragraph [ref=e122]: One API key, one header. Usage tracking with monthly auto-reset. Start free and scale when you're ready.
+      - generic [ref=e123]:
+        - generic [ref=e124]: 📋
+        - heading "OpenAPI Spec" [level=3] [ref=e125]
+        - paragraph [ref=e126]: Full OpenAPI 3.0 documentation with interactive Swagger UI. Test endpoints directly in your browser.
+      - generic [ref=e127]:
+        - generic [ref=e128]: 🚀
+        - heading "Deploy Anywhere" [level=3] [ref=e129]
+        - paragraph [ref=e130]: Dockerfile and render.yaml included. Deploy to Render, Railway, Fly.io, or your own infrastructure.
+  - generic [ref=e131]:
+    - generic [ref=e132]: Developer Experience
+    - heading "Clean, Simple API" [level=2] [ref=e133]
+    - paragraph [ref=e134]: Get rental data with a single POST request.
+    - generic [ref=e135]:
+      - generic [ref=e136]:
+        - button "Request" [ref=e137] [cursor=pointer]
+        - button "Response" [ref=e138] [cursor=pointer]
+      - generic [ref=e139]:
+        - button "Copy" [ref=e140] [cursor=pointer]
+        - generic [ref=e143]: "POST https://rentvolt-api.onrender.com/api/scrape/listings Content-Type: application/json x-api-key: YOUR_API_KEY { \"city\": \"oakland\", \"state\": \"ca\", \"filters\": { \"maxPrice\": 3000, \"minBeds\": 2, \"sortBy\": \"price\", \"limit\": 20 } }"
+  - region "AI agent support" [ref=e144]:
+    - generic [ref=e145]: Built for AI agents
+    - heading "Rental data your agent can actually use." [level=2] [ref=e146]
+    - paragraph [ref=e147]: LLM-native response shapes, function-calling schemas, and an MCP server for Claude and Cursor. Turn "what's 2-bedroom rent in Oakland?" into a sourced answer in one call.
+    - generic [ref=e148]:
+      - generic [ref=e149]:
+        - generic [ref=e150]: Function calling
+        - heading "JSON Schema included" [level=3] [ref=e151]
+        - paragraph [ref=e152]:
+          - text: Every endpoint ships with a ready-to-paste
+          - code [ref=e153]: tools[]
+          - text: definition for Claude, OpenAI, and Gemini agents.
+      - generic [ref=e154]:
+        - generic [ref=e155]: MCP server
+        - heading "Drop-in for Claude Desktop & Cursor" [level=3] [ref=e156]
+        - paragraph [ref=e157]: Expose the API as an MCP tool your assistant can call directly — no orchestration code.
+      - generic [ref=e158]:
+        - generic [ref=e159]: Briefing endpoint
+        - heading "One-paragraph market summary" [level=3] [ref=e160]
+        - paragraph [ref=e161]:
+          - code [ref=e162]: GET /api/market/briefing/:zip
+          - text: returns a single sourced sentence per market — perfect context for an LLM prompt.
+  - generic [ref=e163]:
+    - generic [ref=e164]: Pricing
+    - heading "Simple, Transparent Pricing" [level=2] [ref=e165]
+    - paragraph [ref=e166]: Start free. Scale as you grow. No hidden fees.
+    - generic [ref=e167]:
+      - generic [ref=e168]:
+        - heading "Starter" [level=3] [ref=e169]
+        - generic [ref=e170]: Free
+        - list [ref=e171]:
+          - listitem [ref=e172]: ✓ 100 requests/month
+          - listitem [ref=e173]: ✓ All data sources
+          - listitem [ref=e174]: ✓ Listings + market trends
+          - listitem [ref=e175]: ✓ Community support
+        - button "Get Free API Key" [ref=e176] [cursor=pointer]
+        - paragraph [ref=e177]: No card required. Does not auto-renew.
+      - generic [ref=e178]:
+        - heading "Growth" [level=3] [ref=e179]
+        - generic [ref=e180]: $19/mo
+        - list [ref=e181]:
+          - listitem [ref=e182]: ✓ 1,000 requests/month
+          - listitem [ref=e183]: ✓ All data sources
+          - listitem [ref=e184]: ✓ Bulk queries (10 cities)
+          - listitem [ref=e185]: ✓ Webhook alerts
+          - listitem [ref=e186]: ✓ Email support
+        - button "Start Growth — $19/mo" [ref=e187] [cursor=pointer]
+        - paragraph [ref=e188]: Auto-renews monthly at $19 until you cancel.
+      - generic [ref=e189]:
+        - generic [ref=e190]: MOST POPULAR
+        - heading "Scale" [level=3] [ref=e191]
+        - generic [ref=e192]: $49/mo
+        - list [ref=e193]:
+          - listitem [ref=e194]: ✓ 5,000 requests/month
+          - listitem [ref=e195]: ✓ All data sources
+          - listitem [ref=e196]: ✓ Bulk queries (10 cities)
+          - listitem [ref=e197]: ✓ Saved queries + alerts
+          - listitem [ref=e198]: ✓ Priority support
+        - button "Start Scale — $49/mo" [ref=e199] [cursor=pointer]
+        - paragraph [ref=e200]: Auto-renews monthly at $49 until you cancel.
+      - generic [ref=e201]:
+        - heading "Enterprise" [level=3] [ref=e202]
+        - generic [ref=e203]: $149/mo
+        - list [ref=e204]:
+          - listitem [ref=e205]: ✓ 25,000 requests/month
+          - listitem [ref=e206]: ✓ All data sources
+          - listitem [ref=e207]: ✓ SLA & uptime guarantee
+          - listitem [ref=e208]: ✓ Dedicated support
+          - listitem [ref=e209]: ✓ Custom contract
+        - link "Contact Sales" [ref=e210] [cursor=pointer]:
+          - /url: mailto:sales@groundworklabs.io?subject=RentVolt%20Enterprise
+        - paragraph [ref=e211]: Custom terms. Ask about annual billing.
+  - generic [ref=e213]:
+    - heading "Start Building with RentVolt" [level=2] [ref=e214]
+    - paragraph [ref=e215]: Get your free API key and start querying 6 rental data sources today.
+    - button "⚡ Get Free API Key" [ref=e216] [cursor=pointer]
+    - generic [ref=e217]: No credit card required · 100 free requests per month · Does not auto-renew
+  - region "Newsletter" [ref=e218]:
+    - generic [ref=e219]:
+      - heading "Changelog in your inbox" [level=3] [ref=e220]
+      - paragraph [ref=e221]: New endpoints, price changes, deprecations. Low volume. Unsubscribe anytime.
+      - generic [ref=e222]:
+        - textbox "Email address" [ref=e223]:
+          - /placeholder: you@example.com
+        - button "Subscribe" [ref=e224] [cursor=pointer]
+      - alert [ref=e225]
+  - contentinfo [ref=e226]:
+    - generic [ref=e227]:
+      - generic [ref=e228]:
+        - generic [ref=e229]:
+          - generic [ref=e230]: ⚡
+          - text: RentVolt
+        - paragraph [ref=e231]: Real-time rental data aggregation for developers, investors, and researchers. A Groundwork Labs product.
+      - generic [ref=e232]:
+        - heading "Product" [level=4] [ref=e233]
+        - list [ref=e234]:
+          - listitem [ref=e235]:
+            - link "Features" [ref=e236] [cursor=pointer]:
+              - /url: "#features"
+          - listitem [ref=e237]:
+            - link "Pricing" [ref=e238] [cursor=pointer]:
+              - /url: /pricing
+          - listitem [ref=e239]:
+            - link "API Docs" [ref=e240] [cursor=pointer]:
+              - /url: /api-docs
+          - listitem [ref=e241]:
+            - link "Dashboard" [ref=e242] [cursor=pointer]:
+              - /url: /dashboard
+          - listitem [ref=e243]:
+            - link "Book a demo" [ref=e244] [cursor=pointer]:
+              - /url: /demo
+          - listitem [ref=e245]:
+            - link "API versioning policy" [ref=e246] [cursor=pointer]:
+              - /url: /legal/api-versioning
+          - listitem [ref=e247]:
+            - link "Status" [ref=e248] [cursor=pointer]:
+              - /url: https://stats.uptimerobot.com/
+      - generic [ref=e249]:
+        - heading "Legal" [level=4] [ref=e250]
+        - list [ref=e251]:
+          - listitem [ref=e252]:
+            - link "Terms of Service" [ref=e253] [cursor=pointer]:
+              - /url: /legal/tos
+          - listitem [ref=e254]:
+            - link "Privacy Policy" [ref=e255] [cursor=pointer]:
+              - /url: /legal/privacy
+          - listitem [ref=e256]:
+            - link "Acceptable Use" [ref=e257] [cursor=pointer]:
+              - /url: /legal/aup
+          - listitem [ref=e258]:
+            - link "Refund Policy" [ref=e259] [cursor=pointer]:
+              - /url: /legal/refund
+          - listitem [ref=e260]:
+            - link "DMCA" [ref=e261] [cursor=pointer]:
+              - /url: /legal/dmca
+          - listitem [ref=e262]:
+            - link "Disclaimer" [ref=e263] [cursor=pointer]:
+              - /url: /legal/disclaimer
+          - listitem [ref=e264]:
+            - link "Do Not Sell or Share" [ref=e265] [cursor=pointer]:
+              - /url: /legal/do-not-sell
+              - strong [ref=e266]: Do Not Sell or Share
+      - generic [ref=e267]:
+        - heading "Connect" [level=4] [ref=e268]
+        - list [ref=e269]:
+          - listitem [ref=e270]:
+            - link "GitHub" [ref=e271] [cursor=pointer]:
+              - /url: https://github.com/ZayM511/rentvolt-api
+    - generic [ref=e272]:
+      - generic [ref=e273]: © 2026 Groundwork Labs LLC. All rights reserved.
+      - generic [ref=e274]: California, USA

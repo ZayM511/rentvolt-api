@@ -217,6 +217,16 @@
       backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       font-weight: 500;
     }
+    /* ── /#tryit language snippet tabs (B2) ── */
+    .snippet-tab {
+      background: transparent; color: var(--text-muted); border: none;
+      padding: 8px 12px; cursor: pointer; font-family: inherit; font-size: 13px;
+      border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.2s, border-color 0.2s;
+    }
+    .snippet-tab:hover { color: var(--text-primary); }
+    .snippet-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .snippet-panel { display: none; }
+    .snippet-panel.active { display: block; }
 
     /* ── Hero code pane (right column) ───────────────────── */
     .hero-code {
@@ -277,7 +287,7 @@
     .stat-label { font-size: 0.9em; color: var(--text-secondary); margin-top: 8px; }
 
     /* ── Section Shared ────────────── */
-    .section { max-width: 1100px; margin: 0 auto; padding: 100px 24px; }
+    .section { max-width: 1100px; margin: 0 auto; padding: 72px 24px; }
     .section-label {
       font-size: 0.85em; font-weight: 600; color: var(--accent); text-transform: uppercase;
       letter-spacing: 0.1em; margin-bottom: 12px; text-align: center;
@@ -309,7 +319,7 @@
     .step p { color: var(--text-secondary); font-size: 0.95em; }
 
     /* ── Try It Out ────────────────── */
-    .tryit-section { background: var(--bg-tertiary); padding: 100px 24px; }
+    .tryit-section { background: var(--bg-tertiary); padding: 72px 24px; }
     .tryit-container { max-width: 1100px; margin: 0 auto; }
     .tryit-grid {
       display: grid; grid-template-columns: 380px 1fr; gap: 40px; align-items: start;
@@ -738,20 +748,23 @@
   <!-- ── How It Works ── -->
   <section class="section">
     <div class="section-label">How It Works</div>
-    <h2 class="section-title">Three Steps to Rental Data</h2>
+    <h2 class="section-title">Ship your first integration tonight</h2>
     <p class="section-subtitle">From signup to live data in under a minute.</p>
     <div class="steps">
       <div class="step animate-on-scroll">
+        <img src="/step-1.png" alt="" aria-hidden="true" loading="lazy" style="width:96px;height:96px;border-radius:50%;margin-bottom:20px;object-fit:cover;box-shadow:0 8px 30px rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.2)">
         <div class="step-number">1</div>
         <h3>Get Your API Key</h3>
         <p>Sign up free and get your key instantly. No credit card required.</p>
       </div>
       <div class="step animate-on-scroll">
+        <img src="/step-2.png" alt="" aria-hidden="true" loading="lazy" style="width:96px;height:96px;border-radius:50%;margin-bottom:20px;object-fit:cover;box-shadow:0 8px 30px rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.2)">
         <div class="step-number">2</div>
         <h3>Make a Request</h3>
         <p>POST to /api/scrape/listings with a city and optional filters.</p>
       </div>
       <div class="step animate-on-scroll">
+        <img src="/step-3.png" alt="" aria-hidden="true" loading="lazy" style="width:96px;height:96px;border-radius:50%;margin-bottom:20px;object-fit:cover;box-shadow:0 8px 30px rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.2)">
         <div class="step-number">3</div>
         <h3>Get Listings</h3>
         <p>Receive deduplicated, sorted rental data from all 6 sources.</p>
@@ -771,6 +784,7 @@
           <div class="tryit-select-wrapper">
             <label for="citySelect">Select a City</label>
             <select class="tryit-select" id="citySelect">
+              <option value="" selected disabled>— Choose a city —</option>
               <optgroup label="Bay Area">
                 <option value="oakland">Oakland, CA</option>
                 <option value="san-francisco">San Francisco, CA</option>
@@ -803,6 +817,21 @@
           </div>
           <button class="tryit-execute" id="executeBtn">&#9889; Execute Request</button>
           <p class="tryit-note">Free demo &middot; 3 requests per day &middot; Real data</p>
+
+          <!-- ── B2 language snippet tabs ── -->
+          <div class="snippet-tabs" role="tablist" aria-label="Code snippet language" style="margin-top:24px;display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:2px">
+            <button class="snippet-tab active" data-lang="curl" role="tab">cURL</button>
+            <button class="snippet-tab" data-lang="node" role="tab">Node</button>
+            <button class="snippet-tab" data-lang="python" role="tab">Python</button>
+            <button class="snippet-tab" data-lang="go" role="tab">Go</button>
+            <button class="snippet-tab" data-lang="llm" role="tab">LLM tool</button>
+            <button class="snippet-copy" id="snippetCopy" style="margin-left:auto;background:transparent;color:var(--accent);border:1px solid rgba(255,255,255,.12);padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer">Copy</button>
+          </div>
+          <div class="snippet-panel active" data-lang="curl" data-template='curl "https://rentvolt-api.onrender.com/demo/listings?city={CITY}&state=ca"'><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code>curl "https://rentvolt-api.onrender.com/demo/listings?city={CITY}&amp;state=ca"</code></pre></div>
+          <div class="snippet-panel" data-lang="node" data-template="const res = await fetch(&quot;https://rentvolt-api.onrender.com/api/scrape/listings&quot;, {&#10;  method: &quot;POST&quot;,&#10;  headers: { &quot;Content-Type&quot;: &quot;application/json&quot;, &quot;x-api-key&quot;: process.env.RENTVOLT_KEY },&#10;  body: JSON.stringify({ city: &quot;{CITY}&quot;, state: &quot;ca&quot; })&#10;});&#10;const { listings } = await res.json();"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
+          <div class="snippet-panel" data-lang="python" data-template="import os, requests&#10;r = requests.post(&#10;    &quot;https://rentvolt-api.onrender.com/api/scrape/listings&quot;,&#10;    json={&quot;city&quot;: &quot;{CITY}&quot;, &quot;state&quot;: &quot;ca&quot;},&#10;    headers={&quot;x-api-key&quot;: os.environ[&quot;RENTVOLT_KEY&quot;]},&#10;)&#10;print(r.json()[&quot;listings&quot;])"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
+          <div class="snippet-panel" data-lang="go" data-template="body := strings.NewReader(`{&quot;city&quot;:&quot;{CITY}&quot;,&quot;state&quot;:&quot;ca&quot;}`)&#10;req, _ := http.NewRequest(&quot;POST&quot;, &quot;https://rentvolt-api.onrender.com/api/scrape/listings&quot;, body)&#10;req.Header.Set(&quot;Content-Type&quot;, &quot;application/json&quot;)&#10;req.Header.Set(&quot;x-api-key&quot;, os.Getenv(&quot;RENTVOLT_KEY&quot;))&#10;resp, _ := http.DefaultClient.Do(req)"><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
+          <div class="snippet-panel" data-lang="llm" data-template='{&#10;  &quot;name&quot;: &quot;rentvolt_search&quot;,&#10;  &quot;description&quot;: &quot;Search live rental listings for a US city, with HUD+Census context.&quot;,&#10;  &quot;input_schema&quot;: {&#10;    &quot;type&quot;: &quot;object&quot;,&#10;    &quot;properties&quot;: {&#10;      &quot;city&quot;:  { &quot;type&quot;: &quot;string&quot;, &quot;examples&quot;: [&quot;{CITY}&quot;] },&#10;      &quot;state&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;pattern&quot;: &quot;^[a-z]{2}$&quot; }&#10;    },&#10;    &quot;required&quot;: [&quot;city&quot;, &quot;state&quot;]&#10;  }&#10;}'><pre style="background:rgba(0,0,0,.4);padding:12px;border-radius:6px;margin:12px 0 0;overflow-x:auto;font-family:var(--font-mono);font-size:12px;color:#d5d8dd"><code></code></pre></div>
         </div>
         <div class="tryit-results" id="resultsPanel">
           <div class="tryit-results-header">
@@ -1062,8 +1091,11 @@
     </div>
   </footer>
 
-  <script>
-    // ── Sticky Nav ──
+  <script src="/home.js" defer></script>
+  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+  <script src="/app.js" defer></script>
+  <!-- Legacy inline block (disabled; kept as reference — ignored because of type) -->
+  <script type="text/disabled">
     const nav = document.getElementById('nav');
     window.addEventListener('scroll', () => {
       nav.classList.toggle('scrolled', window.scrollY > 50);
@@ -1281,7 +1313,5 @@
       updateDemoBtn();
     });
   </script>
-  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-  <script src="/app.js"></script>
 </body>
 </html>
