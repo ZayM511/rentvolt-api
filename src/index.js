@@ -391,10 +391,18 @@ app.get('/demo/listings', async (req, res) => {
         marketContext = {
           zip: firstZip,
           hud: trends.hud || null,
-          census: trends.census || null
+          census: trends.census || null,
+          // Diagnostic — so we can see why hud/census are missing in the wild
+          ...(trends.hudError    ? { hudError:    trends.hudError }    : {}),
+          ...(trends.censusError ? { censusError: trends.censusError } : {})
         };
+        console.log('[demo/listings] marketContext for zip', firstZip, '→', JSON.stringify({
+          hud: !!trends.hud, census: !!trends.census,
+          hudErr: trends.hudError, censusErr: trends.censusError
+        }));
       } catch (err) {
         console.warn('[demo/listings] market context unavailable:', err.message);
+        marketContext = { zip: firstZip, hud: null, census: null, error: err.message };
       }
     }
 
