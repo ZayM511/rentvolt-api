@@ -10,58 +10,75 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;padding:24px}
   .wrap{max-width:760px;margin:0 auto}
-  h1{margin:0 0 24px}
+  h1{margin:0 0 24px;display:flex;align-items:center;gap:12px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px}
   .muted{color:var(--muted)}
   label{display:block;margin:12px 0 6px;color:var(--muted);font-size:14px}
   input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--fg);padding:10px 12px;border-radius:8px;font-size:14px}
   .btn{background:var(--accent);color:#000;padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;margin-right:8px;margin-top:12px}
+  .btn:disabled{opacity:.6;cursor:default}
   .btn-outline{background:transparent;color:var(--fg);border:1px solid var(--border)}
   .stat{font-size:32px;font-weight:700;color:var(--accent)}
   .progress{background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;height:8px;margin:10px 0}
-  .progress > div{height:100%;background:var(--accent)}
+  .progress > div{height:100%;background:var(--accent);transition:width .3s ease}
   nav a{color:var(--fg);text-decoration:none;margin-right:16px;font-size:14px}
   .err{color:#ffb0b0;font-size:13px;margin-top:8px}
+  .ok{color:#b0ffb8;font-size:13px;margin-top:8px}
   .hidden{display:none}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-size:13px}
+  pre.key-reveal{background:#000;border:1px solid var(--accent);color:var(--accent);padding:14px;border-radius:8px;font-size:13px;overflow-x:auto;word-break:break-all;margin:12px 0}
 </style>
 </head>
 <body>
   <div class="wrap">
     <nav style="margin-bottom:24px"><a href="/">← Home</a><a href="/api-docs">Docs</a><a href="/pricing">Pricing</a></nav>
 
-    <h1>Dashboard</h1>
+    <h1>⚡ Dashboard</h1>
 
-    <div id="signed-out" class="card">
+    <!-- Signed-out -->
+    <div id="signed-out" class="card hidden" role="region" aria-label="Sign in">
       <h3 style="margin-top:0">Sign in</h3>
       <p class="muted">Enter your email to receive a sign-in link. No password needed.</p>
-      <label>Email</label>
-      <input id="email" type="email" placeholder="you@example.com">
+      <label for="email-input">Email</label>
+      <input id="email-input" type="email" placeholder="you@example.com" autocomplete="email">
       <button class="btn" id="send-link">Send sign-in link</button>
-      <div id="link-sent" class="muted hidden" style="margin-top:12px">✓ Check your inbox — click the link to sign in.</div>
-      <div id="link-err" class="err hidden"></div>
+      <div id="link-sent" class="ok hidden" role="alert" aria-live="polite">✓ Check your inbox — the link expires in 15 minutes.</div>
+      <div id="link-err" class="err hidden" role="alert" aria-live="assertive"></div>
       <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
-      <p class="muted" style="font-size:13px">Already have an API key? You can call <code>GET /api/verify</code> with it to check usage without signing in.</p>
+      <p class="muted" style="font-size:13px">Already have an API key? You can call <code>GET /api/verify</code> with your <code>x-api-key</code> header to check usage without signing in.</p>
     </div>
 
+    <!-- Signed-in -->
     <div id="signed-in" class="hidden">
       <div class="card">
+        <div class="row">
+          <div class="muted" style="font-size:14px">Signed in as <strong id="me-email">—</strong></div>
+          <button class="btn btn-outline" id="signout">Sign out</button>
+        </div>
+      </div>
+
+      <div class="card" id="card-usage">
         <h3 style="margin-top:0">Usage this month</h3>
         <div class="stat"><span id="used">—</span> / <span id="limit">—</span></div>
         <div class="progress"><div id="bar" style="width:0"></div></div>
         <p class="muted"><span id="plan-label">—</span> plan · resets <span id="reset">—</span></p>
       </div>
 
-      <div class="card">
+      <div class="card" id="card-key">
         <h3 style="margin-top:0">API key</h3>
-        <p class="muted">Your key: <code id="prefix">—</code>…</p>
-        <p class="muted" style="font-size:13px">For security we never show the full key again. If you lost it, rotate:</p>
+        <p class="muted">Your key prefix: <code id="prefix">—</code>…</p>
+        <p class="muted" style="font-size:13px">For security we never show the full key again after issuance. If you've lost it, rotate below — the old key is revoked instantly.</p>
         <button class="btn btn-outline" id="rotate">Rotate API key</button>
+        <pre class="key-reveal hidden" id="new-key"></pre>
+        <div id="rotate-err" class="err hidden" role="alert"></div>
       </div>
 
-      <div class="card">
+      <div class="card" id="card-billing">
         <h3 style="margin-top:0">Billing</h3>
         <button class="btn" id="manage">Manage subscription in Stripe</button>
         <p class="muted" style="font-size:13px;margin-top:12px">Cancel, upgrade, update payment, and download invoices from Stripe's secure portal.</p>
+        <div id="manage-err" class="err hidden" role="alert"></div>
       </div>
 
       <div class="card">
@@ -72,37 +89,6 @@
     </div>
   </div>
 
-<script>
-// Magic-link dashboard flow: placeholder for now. Full implementation needs /api/auth/request-link + /api/auth/consume-link.
-// Until that's wired, dashboard is email-request only and guides users to verify via /api/verify with their key.
-document.getElementById('send-link').addEventListener('click', async () => {
-  const email = document.getElementById('email').value.trim();
-  if (!email) return;
-  const err = document.getElementById('link-err');
-  const ok = document.getElementById('link-sent');
-  err.classList.add('hidden'); ok.classList.add('hidden');
-  try {
-    const res = await fetch('/api/auth/request-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    if (res.status === 404) {
-      err.textContent = 'Dashboard sign-in is coming soon. For now, verify your key with: curl -H "x-api-key: KEY" /api/verify';
-      err.classList.remove('hidden');
-      return;
-    }
-    if (res.ok) ok.classList.remove('hidden');
-    else {
-      const j = await res.json().catch(() => ({}));
-      err.textContent = j.error || 'Could not send link';
-      err.classList.remove('hidden');
-    }
-  } catch {
-    err.textContent = 'Network error';
-    err.classList.remove('hidden');
-  }
-});
-</script>
+<script src="/dashboard.js"></script>
 </body>
 </html>

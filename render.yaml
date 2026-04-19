@@ -32,4 +32,6 @@ services:
       # - EMAIL_REPLY_TO        (e.g. "support@groundworklabs.io")
       # - HUD_API_TOKEN         (optional — https://www.huduser.gov/portal/dataset/fmr-api.html)
       # - CENSUS_API_KEY        (optional — https://api.census.gov/data/key_signup.html)
+      # - SESSION_SECRET        (required — generate with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`)
+      # - GEMINI_API_KEY        (optional — used only by scripts/generate-og.js, not at runtime)
       # - SENTRY_DSN            (optional)

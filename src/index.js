@@ -18,6 +18,8 @@ const { validate, schemas } = require('./middleware/validation');
 const stripeRoutes = require('./routes/stripe');
 const scrapeRoutes = require('./routes/scrape');
 const marketRoutes = require('./routes/market');
+const authRoutes = require('./routes/auth');
+const { attachSession } = require('./middleware/session');
 const { fetchListings } = require('./data');
 
 const app = express();
@@ -69,6 +71,9 @@ app.use((req, res, next) => {
   if (req.originalUrl === '/api/stripe/webhook') return next();
   express.json({ limit: '1mb' })(req, res, next);
 });
+
+// ─── Session (attaches req.user if cookie present; non-blocking) ─
+app.use(attachSession);
 
 // ─── Logging + request-ID ───────────────────────────────
 app.use(requestLogger);
@@ -247,6 +252,36 @@ app.get('/health', async (req, res) => {
   });
 });
 
+// ─── Upstream data-source health ─────────────────────────
+// Surfaces silent outages on RentCast / HUD / Census. No API key required.
+app.get('/api/health/sources', async (req, res) => {
+  const axios = require('axios');
+  const check = async (name, url, headers = {}) => {
+    const t0 = Date.now();
+    try {
+      const response = await axios.get(url, { headers, timeout: 5000, validateStatus: () => true });
+      return { name, ok: response.status < 500, status: response.status, latencyMs: Date.now() - t0 };
+    } catch (err) {
+      return { name, ok: false, error: err.code || err.message, latencyMs: Date.now() - t0 };
+    }
+  };
+  const [rentcast, hud, census] = await Promise.all([
+    process.env.RENTCAST_API_KEY
+      ? check('rentcast', 'https://api.rentcast.io/v1/listings/rental/long-term?city=Austin&state=TX&limit=1', { 'X-Api-Key': process.env.RENTCAST_API_KEY })
+      : Promise.resolve({ name: 'rentcast', ok: false, error: 'RENTCAST_API_KEY not configured' }),
+    process.env.HUD_API_TOKEN
+      ? check('hud', 'https://www.huduser.gov/hudapi/public/fmr/data/78701?year=' + new Date().getFullYear(), { Authorization: `Bearer ${process.env.HUD_API_TOKEN}` })
+      : Promise.resolve({ name: 'hud', ok: false, error: 'HUD_API_TOKEN not configured' }),
+    check('census', 'https://api.census.gov/data/2023/acs/acs5?get=B25064_001E&for=zip%20code%20tabulation%20area:78701' + (process.env.CENSUS_API_KEY ? `&key=${process.env.CENSUS_API_KEY}` : ''))
+  ]);
+  const allOk = rentcast.ok && hud.ok && census.ok;
+  res.status(allOk ? 200 : 503).json({
+    status: allOk ? 'ok' : 'degraded',
+    sources: { rentcast, hud, census },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // ─── Free API key generation ────────────────────────────
 const FREE_KEY_COOLDOWN_HOURS = 24;
 
@@ -328,6 +363,17 @@ app.get('/demo/listings', async (req, res) => {
     );
 
     const results = await fetchListings(city, state, { limit: 5 });
+    const sourcesPresent = Object.entries(results.sources || {}).filter(([, v]) => v > 0).map(([k]) => k);
+    res.set('X-Data-Sources', sourcesPresent.join(',') || 'none');
+    // Fail loudly if no upstream returned data
+    if (sourcesPresent.length === 0) {
+      return res.status(502).json({
+        success: false,
+        error: 'Upstream data sources unavailable',
+        errors: results.errors || {},
+        message: 'Check /api/health/sources for current status.'
+      });
+    }
     res.json({ success: true, ...results });
   } catch (err) {
     console.error('[demo/listings] error:', err.message);
@@ -378,9 +424,17 @@ app.post('/api/privacy-request', async (req, res) => {
   }
 });
 
+// ─── Auth routes (magic-link dashboard auth) ────────────
+app.use('/api', authRoutes);
+
 // ─── API key verify + terms acceptance endpoints ────────
 app.use('/api', (req, res, next) => {
-  const publicPaths = ['/stripe/checkout', '/stripe/plans', '/stripe/webhook', '/stripe/session', '/feedback', '/privacy-request', '/keys/free'];
+  const publicPaths = [
+    '/stripe/checkout', '/stripe/plans', '/stripe/webhook', '/stripe/session',
+    '/feedback', '/privacy-request', '/keys/free',
+    '/auth/request-link', '/auth/consume-link', '/auth/signout',
+    '/me', '/health/sources'
+  ];
   if (publicPaths.some((p) => req.path === p || req.path.startsWith(`${p}/`))) return next();
   return apiKeyAuth(req, res, next);
 });

@@ -3,14 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RentVolt — Real Estate Rental Data API</title>
-  <meta name="description" content="Rental market intelligence API — live listings, market trends, and HUD/Census context for 140M+ US properties. Built for AI agents, indie builders, and property-tech teams.">
+  <title>RentVolt — Rental market intelligence for the internet</title>
+  <meta name="description" content="Live rental listings, HUD Fair Market Rent, and Census context in one API call. Built for AI agents, indie builders, and property-tech teams. 140M+ US properties.">
   <meta name="theme-color" content="#0a0a1a">
-  <meta property="og:title" content="RentVolt — Rental market intelligence API">
-  <meta property="og:description" content="Live rental listings, market trends, and HUD/Census context in one API call. 140M+ US properties. Cancel anytime.">
+  <link rel="canonical" href="https://rentvolt-api.onrender.com/">
+  <meta property="og:title" content="RentVolt — Rental market intelligence for the internet">
+  <meta property="og:description" content="Live rental listings, HUD Fair Market Rent, and Census context in one API call. 140M+ US properties. Cancel anytime.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://rentvolt-api.onrender.com">
+  <meta property="og:url" content="https://rentvolt-api.onrender.com/">
+  <meta property="og:image" content="https://rentvolt-api.onrender.com/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="RentVolt">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://rentvolt-api.onrender.com/og.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://rentvolt-api.onrender.com/#org",
+        "name": "Groundwork Labs LLC",
+        "legalName": "Groundwork Labs LLC",
+        "url": "https://rentvolt-api.onrender.com/",
+        "logo": "https://rentvolt-api.onrender.com/og.png",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "2108 N St Ste N",
+          "addressLocality": "Sacramento",
+          "addressRegion": "CA",
+          "postalCode": "95816",
+          "addressCountry": "US"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "support@groundworklabs.io",
+          "contactType": "customer support"
+        },
+        "identifier": "B20260059957"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "RentVolt API",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any (HTTP/REST)",
+        "publisher": { "@id": "https://rentvolt-api.onrender.com/#org" },
+        "offers": [
+          { "@type": "Offer", "name": "Starter",    "price": "0",   "priceCurrency": "USD" },
+          { "@type": "Offer", "name": "Growth",     "price": "19",  "priceCurrency": "USD" },
+          { "@type": "Offer", "name": "Scale",      "price": "49",  "priceCurrency": "USD" },
+          { "@type": "Offer", "name": "Enterprise", "price": "149", "priceCurrency": "USD" }
+        ],
+        "description": "Rental market intelligence API — live listings, HUD Fair Market Rent, and Census ACS context in one call.",
+        "url": "https://rentvolt-api.onrender.com/"
+      }
+    ]
+  }
+  </script>
   <style>
     /* ── Reset & Base ──────────────── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -113,6 +163,13 @@
       border: 1px solid rgba(255,255,255,0.2);
     }
     .btn-ghost:hover { border-color: rgba(255,255,255,0.4); transform: translateY(-2px); opacity: 1; }
+    .hero-eyebrow {
+      font-size: 0.8em; font-weight: 600; color: var(--accent); text-transform: uppercase;
+      letter-spacing: 0.15em; margin-bottom: 18px;
+    }
+    .hero-microcopy {
+      font-size: 0.9em; color: var(--text-muted); margin: 0 auto 40px; text-align: center;
+    }
     .source-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
     .source-pill {
       background: var(--glass-bg); border: 1px solid var(--glass-border);
@@ -512,20 +569,32 @@
   <!-- ── Hero ── -->
   <section class="hero">
     <div class="hero-content">
-      <h1>Real-Time Rental Data<br><span class="accent">From 6 Sources, One API Call</span></h1>
-      <p class="subtitle">Rental listings, market trends, and HUD/Census context for 140M+ US properties — in one API call. Built for AI agents, indie builders, and property-tech teams.</p>
+      <div class="hero-eyebrow">RENTAL MARKET INTELLIGENCE API</div>
+      <h1>Rental market intelligence <span class="accent">for the internet.</span></h1>
+      <p class="subtitle">Live listings, HUD Fair Market Rent, and Census context in one API call. Built for AI agents, indie builders, and property-tech teams.</p>
       <div class="hero-buttons">
-        <a href="#tryit" class="btn btn-primary">&#9889; Try It Live</a>
-        <a href="/api-docs" class="btn btn-ghost">View Docs</a>
+        <a href="#pricing" class="btn btn-primary" data-action="hero-cta">Get API Key — Free</a>
+        <a href="#tryit" class="btn btn-ghost">Try live demo ↓</a>
       </div>
-      <div class="source-pills">
-        <span class="source-pill">RentCast (140M+ properties)</span>
-        <span class="source-pill">HUD Fair Market Rents</span>
-        <span class="source-pill">Rent.com</span>
-        <span class="source-pill">US Census ACS</span>
-        <span class="source-pill">Public records</span>
-        <span class="source-pill">AVM estimates</span>
+      <p class="hero-microcopy">No credit card. 100 requests/month. 2-minute setup.</p>
+      <div class="source-pills" aria-label="Trust signals">
+        <span class="source-pill">🏛 California LLC · B20260059957</span>
+        <span class="source-pill">🛡 CCPA / CPRA compliant</span>
+        <span class="source-pill">🏘 Fair-Housing aligned</span>
+        <span class="source-pill">🔒 PCI via Stripe</span>
       </div>
+    </div>
+  </section>
+
+  <!-- ── Data Sources (moved from hero) ── -->
+  <section class="section" style="padding-top: 40px; padding-bottom: 40px;" aria-label="Data sources">
+    <p style="text-align:center; color: var(--text-muted); font-size: 0.85em; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 20px;">Powered by</p>
+    <div class="source-pills" style="max-width: 900px; margin: 0 auto;">
+      <span class="source-pill">RentCast (140M+ properties)</span>
+      <span class="source-pill">HUD Fair Market Rents</span>
+      <span class="source-pill">US Census ACS</span>
+      <span class="source-pill">Public records</span>
+      <span class="source-pill">AVM estimates</span>
     </div>
   </section>
 

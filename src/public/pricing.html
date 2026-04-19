@@ -128,6 +128,101 @@
       <span>📄 CCPA / CPRA compliant</span>
     </div>
 
+    <!-- ── Your rate limit ── -->
+    <section style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin:32px 0">
+      <h3 style="margin:0 0 12px;font-size:18px">Your rate limit</h3>
+      <p style="color:var(--muted);font-size:14px;line-height:1.7;margin:0">
+        Every plan gets a <strong style="color:var(--fg)">global limit of 200 requests / 15 minutes</strong> plus your plan's monthly quota
+        (100 / 1,000 / 5,000 / 25,000). When you hit the limit, we return HTTP <code style="background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px">429</code>
+        with a <code style="background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px">Retry-After</code> header — your client can back off precisely.
+      </p>
+    </section>
+
+    <!-- ── Comparison table ── -->
+    <section style="margin:48px 0">
+      <h2 style="text-align:center;font-size:28px;margin:0 0 8px">How RentVolt compares</h2>
+      <p style="color:var(--muted);text-align:center;margin:0 0 24px;font-size:14px">Factual feature comparison across rental-data APIs.</p>
+      <div style="overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--card)">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:720px">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:16px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.08em">Feature</th>
+            <th style="text-align:left;padding:16px 14px;border-bottom:1px solid var(--border);background:rgba(0,212,255,0.06);color:var(--accent);font-weight:700">RentVolt</th>
+            <th style="text-align:left;padding:16px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">RentCast</th>
+            <th style="text-align:left;padding:16px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">ATTOM Data</th>
+            <th style="text-align:left;padding:16px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Zillow API</th>
+          </tr>
+        </thead>
+        <tbody style="color:var(--muted)">
+          <tr>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg);font-weight:500">Starting price</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,212,255,0.03);color:var(--fg)">$0 free · $19 paid</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">$0 free · $49 paid</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">$89+ / enterprise contracts</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">Free (non-commercial only)</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg);font-weight:500">Free-tier cap</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,212,255,0.03);color:var(--fg)">100 req/mo, indefinite</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">Limited trial</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">None</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">Non-commercial only</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg);font-weight:500">Live rental listings</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,212,255,0.03);color:var(--accent)">✓</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--accent)">✓</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--accent)">✓</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--accent)">✓ (read-only)</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg);font-weight:500">HUD Fair Market Rent overlay</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,212,255,0.03);color:var(--accent)">✓</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">—</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">partial</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">—</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg);font-weight:500">Census ACS demographic context</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,212,255,0.03);color:var(--accent)">✓</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">—</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">partial</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">—</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg);font-weight:500">AI-agent / MCP support</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,212,255,0.03);color:var(--accent)">✓</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--accent)">✓ (recent)</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">—</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">—</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg);font-weight:500">Cancel anytime, no contract</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,212,255,0.03);color:var(--accent)">✓</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--accent)">✓</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">Typically contract</td>
+            <td style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">N/A</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 14px;color:var(--fg);font-weight:500">Fair-Housing-aligned AUP</td>
+            <td style="padding:12px 14px;background:rgba(0,212,255,0.03);color:var(--accent)">✓ (explicit)</td>
+            <td style="padding:12px 14px">Not stated publicly</td>
+            <td style="padding:12px 14px">Not stated publicly</td>
+            <td style="padding:12px 14px;color:var(--accent)">Yes</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="color:var(--muted);font-size:11px;text-align:center;margin-top:12px;line-height:1.6">
+        Comparison current as of April 2026, based on publicly available pricing &amp; documentation.
+        Sources:
+        <a href="https://www.rentcast.io/pricing" target="_blank" rel="noopener" style="color:var(--accent)">rentcast.io</a> ·
+        <a href="https://www.attomdata.com/solutions/property-data-api/" target="_blank" rel="noopener" style="color:var(--accent)">attomdata.com</a> ·
+        <a href="https://www.zillowgroup.com/developers/" target="_blank" rel="noopener" style="color:var(--accent)">zillowgroup.com/developers</a>.
+        Something inaccurate? Email <a href="mailto:support@groundworklabs.io" style="color:var(--accent)">support@groundworklabs.io</a> — we'll fix it.
+      </p>
+    </section>
+
     <footer>
       <a href="/legal/tos">Terms</a> ·
       <a href="/legal/privacy">Privacy</a> ·
