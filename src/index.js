@@ -44,13 +44,13 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      // Allow inline styles for now (marketing page uses them heavily).
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      // Allow inline styles (marketing page) + Google Fonts stylesheet host.
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       scriptSrc: ["'self'"],
-      scriptSrcAttr: ["'none'"], // block inline event handlers (onclick="...")
+      scriptSrcAttr: ["'none'"],
       imgSrc: ["'self'", 'data:', 'https:'],
       connectSrc: ["'self'"],
-      fontSrc: ["'self'", 'data:'],
+      fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
       objectSrc: ["'none'"],
       frameAncestors: ["'none'"]
     }
