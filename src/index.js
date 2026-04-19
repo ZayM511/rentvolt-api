@@ -376,8 +376,12 @@ app.get('/demo/listings', async (req, res) => {
     }
     res.json({ success: true, ...results });
   } catch (err) {
-    console.error('[demo/listings] error:', err.message);
-    res.status(500).json({ error: 'Demo request failed. Please try again.' });
+    console.error('[demo/listings] error:', err.message, err.stack);
+    res.status(500).json({
+      error: 'Demo request failed. Please try again.',
+      detail: err.message,
+      code: err.code || null
+    });
   }
 });
 
