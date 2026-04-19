@@ -142,6 +142,15 @@ app.get('/dashboard', servePublic('dashboard.html'));
 app.get('/privacy-request', servePublic('privacy-request.html'));
 app.get('/demo', servePublic('demo.html'));
 
+// ─── Changelog ──────────────────────────────────────────
+app.get('/changelog', (req, res) => {
+  const filepath = path.join(__dirname, '..', 'CHANGELOG.md');
+  if (!fs.existsSync(filepath)) return res.status(404).json({ error: 'CHANGELOG.md missing' });
+  const md = fs.readFileSync(filepath, 'utf8');
+  const html = markdownToHtml(md);
+  res.type('html').send(renderLegalPage('changelog', html));
+});
+
 // ─── Cache-Control for static-ish marketing pages ───────
 app.use((req, res, next) => {
   const p = req.path;
@@ -197,7 +206,8 @@ function renderLegalPage(slug, bodyHtml) {
     refund: 'Refund Policy',
     dmca: 'DMCA Policy',
     'do-not-sell': 'Do Not Sell or Share My Personal Information',
-    'api-versioning': 'API Versioning & Deprecation Policy'
+    'api-versioning': 'API Versioning & Deprecation Policy',
+    'changelog': 'Changelog'
   }[slug] || 'Legal';
 
   return `<!doctype html><html lang="en"><head>
@@ -264,6 +274,74 @@ app.get('/health', async (req, res) => {
     checks,
     timestamp: new Date().toISOString()
   });
+});
+
+// ─── Admin: retention metrics ───────────────────────────
+// Usage: curl -H "x-admin-token: $ADMIN_TOKEN" /api/admin/retention
+app.get('/api/admin/retention', async (req, res) => {
+  const adminToken = process.env.ADMIN_TOKEN;
+  if (!adminToken) return res.status(503).json({ error: 'ADMIN_TOKEN not configured on server' });
+  if (req.headers['x-admin-token'] !== adminToken) {
+    return res.status(401).json({ error: 'Invalid admin token' });
+  }
+  try {
+    const [windowStats, perPlan, signups] = await Promise.all([
+      db.query(
+        `SELECT
+           count(*)::int                                                        AS total_keys,
+           count(*) FILTER (WHERE status = 'active')::int                       AS active_keys,
+           count(*) FILTER (WHERE status = 'cancelled')::int                    AS cancelled_keys,
+           count(*) FILTER (WHERE last_used_at > now() - interval '1 day')::int    AS dau,
+           count(*) FILTER (WHERE last_used_at > now() - interval '7 days')::int   AS wau,
+           count(*) FILTER (WHERE last_used_at > now() - interval '30 days')::int  AS mau,
+           count(*) FILTER (WHERE last_used_at IS NULL)::int                       AS never_used,
+           count(*) FILTER (WHERE status = 'active' AND (last_used_at IS NULL OR last_used_at < now() - interval '30 days'))::int AS dormant_30d
+         FROM api_keys`
+      ),
+      db.query(
+        `SELECT plan,
+                count(*)::int                                                            AS keys,
+                count(*) FILTER (WHERE last_used_at > now() - interval '7 days')::int     AS active_7d,
+                count(*) FILTER (WHERE last_used_at > now() - interval '30 days')::int    AS active_30d
+           FROM api_keys
+          WHERE status = 'active'
+          GROUP BY plan
+          ORDER BY plan`
+      ),
+      db.query(
+        `SELECT
+           count(*) FILTER (WHERE created_at > now() - interval '7 days')::int  AS users_7d,
+           count(*) FILTER (WHERE created_at > now() - interval '30 days')::int AS users_30d,
+           count(*)::int                                                        AS users_total
+         FROM users`
+      )
+    ]);
+
+    const s = windowStats.rows[0];
+    const u = signups.rows[0];
+    const dauMau = s.mau > 0 ? Math.round((s.dau / s.mau) * 1000) / 10 : 0;
+    const churnRate30d = s.active_keys + s.cancelled_keys > 0
+      ? Math.round((s.cancelled_keys / (s.active_keys + s.cancelled_keys)) * 1000) / 10
+      : 0;
+
+    res.json({
+      generatedAt: new Date().toISOString(),
+      totals: {
+        totalKeys: s.total_keys,
+        activeKeys: s.active_keys,
+        cancelledKeys: s.cancelled_keys,
+        neverUsed: s.never_used,
+        dormantActive30d: s.dormant_30d
+      },
+      activity: { dau: s.dau, wau: s.wau, mau: s.mau, dauMauRatioPct: dauMau },
+      signups: { last7d: u.users_7d, last30d: u.users_30d, total: u.users_total },
+      churn: { cancelled30d: s.cancelled_keys, impliedChurnRatePct: churnRate30d },
+      byPlan: perPlan.rows
+    });
+  } catch (err) {
+    console.error('[admin/retention] error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ─── Admin: upstream-call cost summary ──────────────────
@@ -706,6 +784,12 @@ if (require.main === module) {
       require('./jobs/warm-cache').start();
     } catch (err) {
       console.warn('[boot] warm-cache start failed:', err.message);
+    }
+    // Start the cost-alert job (delays 2min internally, then runs hourly)
+    try {
+      require('./jobs/cost-alert').start();
+    } catch (err) {
+      console.warn('[boot] cost-alert start failed:', err.message);
     }
   });
 

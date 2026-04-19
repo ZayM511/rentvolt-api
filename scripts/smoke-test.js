@@ -25,6 +25,7 @@ const checks = [
   { name: 'Demo endpoint Oakland', path: '/demo/listings?city=oakland&state=ca', expect: [200, 429, 502] },
   { name: 'Book-a-demo page',      path: '/demo',                     expect: 200 },
   { name: 'API versioning doc',    path: '/legal/api-versioning',     expect: 200 },
+  { name: 'Changelog',             path: '/changelog',                expect: 200 },
   { name: '/api/stats',            path: '/api/stats',                expect: 200 },
   { name: 'Subscribe bad email',   path: '/api/subscribe',            expect: 400, method: 'POST' },
   { name: 'Demo request bad body', path: '/api/demo-request',         expect: 400, method: 'POST' },
