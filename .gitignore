@@ -19,3 +19,7 @@ page-*.png
 /data/api-keys.json
 /data/
 
+
+# Playwright scratch screenshots
+logo-check.png
+*-check.png
