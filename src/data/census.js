@@ -15,9 +15,8 @@ const axClient = axios.create({ timeout: TIMEOUT_MS, headers: { Accept: 'applica
 const fetchAcsByZip = async (zip, year) => {
   const y = year || 2023; // ACS 5-year lags ~2 years
   const vars = 'B25064_001E,B25002_001E,B25002_003E,B19013_001E';
-  // Drop key param entirely — Census ACS works keyless for low-volume use
-  // and an invalid key returns an error object that breaks array-destructure parsing.
-  const url = `${ACS_BASE}/${y}/acs/acs5?get=${vars}&for=zip%20code%20tabulation%20area:${zip}`;
+  const key = process.env.CENSUS_API_KEY ? `&key=${process.env.CENSUS_API_KEY}` : '';
+  const url = `${ACS_BASE}/${y}/acs/acs5?get=${vars}&for=zip%20code%20tabulation%20area:${zip}${key}`;
   const { data } = await axClient.get(url);
   // Expected response shape: [[headers...], [values...]]
   // Census sometimes returns an error object (e.g. invalid vars) or HTML on outage.
