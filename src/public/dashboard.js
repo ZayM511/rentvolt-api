@@ -7,11 +7,14 @@
 
   async function loadMe() {
     try {
+      // Silent check first — always 200, avoids the 401 console noise.
+      const probe = await fetch('/api/auth/session', { credentials: 'same-origin' });
+      const p = await probe.json();
+      if (!p.authenticated) return renderSignedOut();
+      // Signed in — fetch the full account payload.
       const res = await fetch('/api/me', { credentials: 'same-origin' });
-      if (res.status === 401) return renderSignedOut();
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const me = await res.json();
-      renderSignedIn(me);
+      renderSignedIn(await res.json());
     } catch (err) {
       renderSignedOut();
     }

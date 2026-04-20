@@ -645,7 +645,7 @@ app.use('/api', (req, res, next) => {
   const publicPaths = [
     '/stripe/checkout', '/stripe/plans', '/stripe/webhook', '/stripe/session',
     '/feedback', '/privacy-request', '/keys/free',
-    '/auth/request-link', '/auth/consume-link', '/auth/signout',
+    '/auth/request-link', '/auth/consume-link', '/auth/signout', '/auth/session',
     '/me', '/health/sources', '/stats', '/subscribe'
   ];
   if (publicPaths.some((p) => req.path === p || req.path.startsWith(`${p}/`))) return next();

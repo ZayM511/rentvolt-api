@@ -94,6 +94,15 @@ router.get('/auth/consume-link', async (req, res) => {
   }
 });
 
+// ─── GET /api/auth/session ──────────────────────────────
+// Quiet session probe for the dashboard client. Always returns 200 with
+// { authenticated: boolean, email? } so the browser doesn't log a 401 in
+// the console on every visit by a signed-out user.
+router.get('/auth/session', (req, res) => {
+  if (req.user) return res.json({ authenticated: true, email: req.user.email });
+  res.json({ authenticated: false });
+});
+
 // ─── POST /api/auth/signout ─────────────────────────────
 router.post('/auth/signout', (req, res) => {
   clearCookie(res);
