@@ -99,6 +99,12 @@ app.use((req, res, next) => {
 // ─── Static assets ──────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
+// Browsers auto-request /favicon.ico; serve the brand mark.
+app.get('/favicon.ico', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=604800, immutable');
+  res.sendFile(path.join(__dirname, 'public', 'logo.png'));
+});
+
 // ─── Swagger UI ─────────────────────────────────────────
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -140,6 +146,7 @@ app.get('/success', servePublic('success.html'));
 app.get('/cancel',  servePublic('cancel.html'));
 app.get('/dashboard', servePublic('dashboard.html'));
 app.get('/privacy-request', servePublic('privacy-request.html'));
+app.get('/status', servePublic('status.html'));
 
 // ─── Changelog ──────────────────────────────────────────
 app.get('/changelog', (req, res) => {

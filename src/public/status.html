@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Status — RentVolt</title>
+<meta name="description" content="Real-time status of the RentVolt API and its upstream data sources (RentCast, HUD, Census).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="icon" type="image/png" href="/logo.png">
+<style>
+  :root {
+    --bg: #0a0a1a; --bg2: #0f1a2e; --fg: #e8eaed;
+    --muted: rgba(255,255,255,0.6); --sub: rgba(255,255,255,0.4);
+    --accent: #00d4ff; --ok: #3fe083; --warn: #ffbb7c; --err: #ff6b6b;
+    --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.1);
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--fg);
+    min-height:100vh;-webkit-font-smoothing:antialiased;padding:40px 24px;
+  }
+  .wrap{max-width:760px;margin:0 auto}
+  nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+  nav a{color:var(--muted);text-decoration:none;font-size:14px;margin-right:16px}
+  nav a:hover{color:var(--fg)}
+  .brand{font-weight:700;color:var(--fg);font-size:18px;display:inline-flex;align-items:center;gap:8px}
+  h1{font-size:32px;margin:0 0 8px;letter-spacing:-0.02em}
+  .subtitle{color:var(--muted);margin:0 0 40px;font-size:15px}
+  .banner{
+    display:flex;align-items:center;gap:14px;padding:20px 24px;border-radius:14px;
+    background:linear-gradient(135deg,rgba(63,224,131,0.1),rgba(0,212,255,0.05));
+    border:1px solid rgba(63,224,131,0.3);margin-bottom:32px;
+  }
+  .banner.degraded{background:linear-gradient(135deg,rgba(255,187,124,0.12),rgba(255,107,107,0.05));border-color:rgba(255,187,124,0.4)}
+  .banner.down{background:linear-gradient(135deg,rgba(255,107,107,0.14),rgba(255,107,107,0.05));border-color:rgba(255,107,107,0.4)}
+  .banner-dot{width:14px;height:14px;border-radius:50%;background:var(--ok);box-shadow:0 0 16px rgba(63,224,131,0.5);flex-shrink:0;animation:pulse 2s ease-in-out infinite}
+  .banner.degraded .banner-dot{background:var(--warn);box-shadow:0 0 16px rgba(255,187,124,0.5)}
+  .banner.down .banner-dot{background:var(--err);box-shadow:0 0 16px rgba(255,107,107,0.5)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+  .banner-title{font-weight:600;font-size:17px;margin:0 0 2px}
+  .banner-sub{font-size:13px;color:var(--muted);margin:0}
+  .row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px;background:var(--card);border:1px solid var(--border);
+    border-radius:12px;margin-bottom:10px;
+  }
+  .row-left{display:flex;align-items:center;gap:14px;min-width:0}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .dot.ok{background:var(--ok)}
+  .dot.warn{background:var(--warn)}
+  .dot.err{background:var(--err)}
+  .dot.unknown{background:var(--sub)}
+  .row-name{font-weight:500;font-size:15px}
+  .row-desc{color:var(--muted);font-size:13px;margin-top:2px}
+  .row-meta{color:var(--sub);font-family:var(--mono);font-size:12px;text-align:right;flex-shrink:0}
+  .row-status{font-size:13px;font-weight:500;margin-left:14px;white-space:nowrap}
+  .status-ok{color:var(--ok)}.status-warn{color:var(--warn)}.status-err{color:var(--err)}
+  .row-grid{display:flex;flex-direction:column;min-width:0}
+  .footer-meta{margin-top:32px;color:var(--sub);font-size:12px;text-align:center}
+  .footer-meta a{color:var(--accent)}
+  .refresh-btn{
+    background:transparent;color:var(--muted);border:1px solid var(--border);
+    padding:6px 12px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .refresh-btn:hover{color:var(--fg);border-color:var(--accent)}
+  .refresh-btn:disabled{opacity:0.5;cursor:default}
+  .spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spinAnim 0.8s linear infinite}
+  @keyframes spinAnim{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="/"><img src="/logo.png" alt="" aria-hidden="true" width="24" height="24" style="border-radius:6px"> RentVolt</a>
+      <div>
+        <a href="/">Home</a>
+        <a href="/api-docs">Docs</a>
+        <a href="/dashboard">Sign in</a>
+      </div>
+    </nav>
+
+    <h1>System status</h1>
+    <p class="subtitle">Live health of the RentVolt API and its upstream data sources. Auto-refreshes every 30 seconds.</p>
+
+    <div id="banner" class="banner" role="status" aria-live="polite">
+      <span class="banner-dot"></span>
+      <div>
+        <p class="banner-title" id="banner-title">Checking…</p>
+        <p class="banner-sub" id="banner-sub">Contacting services.</p>
+      </div>
+    </div>
+
+    <div id="rows" role="list" aria-label="Services"></div>
+
+    <div class="footer-meta">
+      Last checked: <span id="last-check">—</span>
+      &nbsp;·&nbsp;
+      <button type="button" id="refresh" class="refresh-btn">Refresh now</button>
+      <br><br>
+      Something broken we don't show here? Email <a href="mailto:support@groundworklabs.io">support@groundworklabs.io</a>.
+      <br>
+      <a href="/changelog">Changelog</a> · <a href="/legal/api-versioning">API versioning policy</a>
+    </div>
+  </div>
+
+<script src="/status.js" defer></script>
+</body>
+</html>
