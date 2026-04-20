@@ -23,3 +23,5 @@ page-*.png
 # Playwright scratch screenshots
 logo-check.png
 *-check.png
+vcheck-*.png
+hero-check.png
