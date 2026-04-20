@@ -25,6 +25,23 @@
   function renderSignedIn(me) {
     hide($('signed-out'));
     show($('signed-in'));
+    // Nav: when signed in, swap "Sign in" → "Sign out" so the current-page
+    // link is actionable and reflects what clicking it does.
+    const navSignin = $('nav-signin');
+    if (navSignin) {
+      navSignin.textContent = 'Sign out';
+      navSignin.removeAttribute('aria-current');
+      navSignin.removeAttribute('href');
+      navSignin.style.cursor = 'pointer';
+      navSignin.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await fetch('/api/auth/signout', { method: 'POST', credentials: 'same-origin' });
+        renderSignedOut();
+        navSignin.textContent = 'Sign in';
+        navSignin.setAttribute('href', '/dashboard');
+        navSignin.setAttribute('aria-current', 'page');
+      }, { once: true });
+    }
     $('me-email').textContent = me.email;
     if (me.key) {
       show($('card-usage'));
